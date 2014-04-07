@@ -14,6 +14,11 @@ ApplicationWindow {
 
     Component.onCompleted: {
         loadPinmux()
+
+        for (var i = 0; i < portList.length; ++i)
+        {
+            portList[i].createTabOrder()
+        }
     }
 
     function loadPinmux()

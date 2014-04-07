@@ -13,6 +13,7 @@ Rectangle {
     property alias numberVisible: numberText.visible
     property string description: "Test"
     property bool editable: true
+    property var textInput: leftTextInput.visible? leftTextInput: rightTextInput
 
     signal previewEntered(string type)
     signal previewExited()
@@ -55,6 +56,16 @@ Rectangle {
 
         Binding { target: main; property: "type"; value: comboBox.currentText }
         Binding { target: comboBox; property: "currentText"; value: main.type }
+
+        Keys.onMenuPressed: {
+            textInput.forceActiveFocus()
+        }
+        Keys.onTabPressed: {
+            textInput.forceActiveFocus()
+        }
+        Keys.onReturnPressed: {
+            textInput.forceActiveFocus()
+        }
     }
 
     TextInput {
@@ -76,6 +87,13 @@ Rectangle {
 
         Binding { target: main; property: "description"; value: rightTextInput.text }
         Binding { target: rightTextInput; property: "text"; value: main.description }
+
+        Keys.onMenuPressed: {
+            comboBox.forceActiveFocus()
+        }
+        Keys.onReturnPressed: {
+            comboBox.forceActiveFocus()
+        }
     }
 
     TextInput {
@@ -97,6 +115,13 @@ Rectangle {
 
         Binding { target: main; property: "description"; value: leftTextInput.text }
         Binding { target: leftTextInput; property: "text"; value: main.description }
+
+        Keys.onMenuPressed: {
+            comboBox.forceActiveFocus()
+        }
+        Keys.onReturnPressed: {
+            comboBox.forceActiveFocus()
+        }
     }
 
     MouseArea {

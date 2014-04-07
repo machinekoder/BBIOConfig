@@ -19,7 +19,8 @@ Rectangle {
         anchors.centerIn: parent
 
         Component.onCompleted: {
-            for (var i = 1; i < 47; ++i)
+            var numPins = 46
+            for (var i = 1; i < (numPins+1); ++i)
             {
                 createPin(i)
             }
@@ -48,6 +49,35 @@ Rectangle {
 
          main.pinList.push(sprite)
      }
+
+    function createTabOrder() {
+        var numPins = 46
+        // set tab order
+        for (var i = 0; i < (numPins-1); ++i)
+        {
+            // skip reserved pins
+            if (!pinList[i].editable)
+                continue;
+
+            // search tab
+            for (var j = i+1; j < numPins; ++j)
+            {
+                if (pinList[j].editable) {
+                    pinList[i].textInput.KeyNavigation.tab = pinList[j].textInput
+                    break;
+                }
+            }
+
+            // search up and down
+            for (var j = i+2; j < numPins; j += 2)
+            {
+                if (pinList[j].editable) {
+                    pinList[i].textInput.KeyNavigation.down = pinList[j].textInput
+                    break;
+                }
+            }
+        }
+    }
 
 }
 
