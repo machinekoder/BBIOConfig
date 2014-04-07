@@ -131,6 +131,8 @@ ApplicationWindow {
                     if (lineData.length > 2)
                     {
                         targetPin.description = lineData[2]
+                        for (var j = 3; j < lineData.length; ++j)
+                            targetPin.description += " " + lineData[j]
                     }
                 }
             }
