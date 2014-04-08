@@ -4,7 +4,9 @@ import QtQuick.Controls.Styles 1.1
 
 Rectangle {
     property var functions: ["GPIO", "I2C", "UART"]
+    property var info: ["gpio1_0", "i2c1_cs", "uart0_sck"]
     property string type: "GPIO"
+    property string cape: "cape-test"
     property string previewType: ""
     property bool previewEnabled: false
     property string gpioType: "in"
@@ -14,6 +16,15 @@ Rectangle {
     property string description: "Test"
     property bool editable: true
     property var textInput: leftTextInput.visible? leftTextInput: rightTextInput
+    property string infoText: {
+        var functionIndex = functions.indexOf((previewEnabled?previewType:type))
+        if ((functionIndex != -1) && (info.length > functionIndex)) {
+            return info[functionIndex]
+        }
+        else {
+            return ""
+        }
+    }
 
     signal previewEntered(string type)
     signal previewExited()
@@ -76,7 +87,7 @@ Rectangle {
         width: parent.width*6
         horizontalAlignment: TextInput.AlignLeft
         font.pixelSize: parent.width*0.9
-        visible: (main.number % 2) == 0
+        visible: !(previewEnabled && (previewType != "")) && ((main.number % 2) == 0)
         readOnly: !main.editable
 
         MouseArea {
@@ -96,6 +107,17 @@ Rectangle {
         }
     }
 
+    Text {
+        id: rightInfoText
+        anchors.verticalCenter: rightTextInput.verticalCenter
+        anchors.left: rightTextInput.left
+        width: rightTextInput.width
+        horizontalAlignment: rightTextInput.horizontalAlignment
+        font: rightTextInput.font
+        visible: previewEnabled && ((main.number % 2) == 0)
+        text: main.infoText
+    }
+
     TextInput {
         id: leftTextInput
         anchors.verticalCenter: parent.verticalCenter
@@ -104,7 +126,7 @@ Rectangle {
         width: parent.width*6
         horizontalAlignment: TextInput.AlignRight
         font.pixelSize: parent.width*0.9
-        visible: (main.number % 2) == 1
+        visible: (!previewEnabled && (previewType != "")) && ((main.number % 2) == 1)
         readOnly: !main.editable
 
         MouseArea {
@@ -113,8 +135,8 @@ Rectangle {
             enabled: false
         }
 
-        Binding { target: main; property: "description"; value: leftTextInput.text }
-        Binding { target: leftTextInput; property: "text"; value: main.description }
+        Binding { target: main; property: "description"; value: leftTextInput.text}
+        Binding { target: leftTextInput; property: "text"; value: main.description}
 
         Keys.onMenuPressed: {
             comboBox.forceActiveFocus()
@@ -122,6 +144,17 @@ Rectangle {
         Keys.onReturnPressed: {
             comboBox.forceActiveFocus()
         }
+    }
+
+    Text {
+        id: leftInfoText
+        anchors.verticalCenter: leftTextInput.verticalCenter
+        anchors.right: leftTextInput.right
+        width: leftTextInput.width
+        horizontalAlignment: leftTextInput.horizontalAlignment
+        font: leftTextInput.font
+        visible: previewEnabled && ((main.number % 2) == 1)
+        text: main.infoText
     }
 
     MouseArea {

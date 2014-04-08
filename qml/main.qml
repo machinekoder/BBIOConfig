@@ -34,51 +34,71 @@ ApplicationWindow {
             return
         }
 
+        // first set all pins to reserved
         for (var j = 0; j < portList.length; ++j)
         {
             for (var i = 0; i < portList[j].pinList.length; ++i)
             {
                 var pin = portList[j].pinList[i]
                 pin.functions = ["reserved"]
+                pin.info = ["reserved"]
                 pin.type = "reserved"
                 pin.editable = false
                 pin.description = ""
+                pin.cape = ""
             }
         }
 
-        var lines = configFile.data.split("\n")
+        var lines = configFile.data.split("\n")             // split it into seperate lines
         for (var i = 0; i < lines.length; ++i)
         {
             var line = lines[i]
-            if ((line.length === 0) || (line[0] === "#")) // skip empty and comment lines
+            if ((line.length === 0) || (line[0] === "#"))   // skip empty and comment lines
                 continue;
 
-            var lineData = line.split("=")
-            lineData[1] = lineData[1].replace("\"","")
+            var lineData = line.split("=")                  // split the line into a left and right side
+            lineData[1] = lineData[1].replace("\"","")      // remove quote marks from the right side
             lineData[1] = lineData[1].replace("\"","")
             var functionsData = lineData[1].split(" ")
-            var pinmuxData = lineData[0].split("_")
+            var pinmuxData = lineData[0].split("_")         // split the left side into port, pin and type
 
-            for (var j = 0; j < functionsData.length; ++j)
+            for (var j = 0; j < functionsData.length; ++j)  // convert the right side into a list of strings
             {
                 var func = functionsData[j]
-                if (functions.indexOf(func) == -1)
+                if (functions.indexOf(func) == -1)          // this has no use yet
                 {
                     functions.push(func)
                 }
             }
 
-            var port = parseInt(pinmuxData[0].substr(1),10)
-            var pin = parseInt(pinmuxData[1],10)
+            var port = parseInt(pinmuxData[0].substr(1),10) // Port, P<n>
+            var pin = parseInt(pinmuxData[1],10)            // Pin <n>
+            var type = pinmuxData[2]                        // Type: PINMUX, INFO, CAPE
 
-            if ((port === 8) || (port === 9))
+            if ((port === 8) || (port === 9))               // BB has only P8 and P9
             {
-                if (pin <= portList[port-8].pinList.length)
+                if (pin <= portList[port-8].pinList.length) // BB has 46 pins per port
                 {
                     var targetPin = portList[port-8].pinList[pin-1]
-                    targetPin.functions = functionsData
-                    targetPin.editable = true
-                    targetPin.type = functionsData[0]
+
+                    console.log(port)
+                    console.log(pin)
+                    console.log(functionsData)
+                    switch(type) {
+                    case "PINMUX":
+                        targetPin.functions = functionsData
+                        targetPin.editable = true
+                        targetPin.type = functionsData[0]
+                        break;
+                    case "INFO":
+                        targetPin.info = functionsData
+                        break;
+                    case "CAPE":
+                        targetPin.cape = functionsData[0]
+                        break;
+                    default:
+                    }
+
                 }
             }
         }
@@ -231,8 +251,11 @@ ApplicationWindow {
             ["timer", "yellow"],]
 
         id: selector
-        anchors.fill: parent
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
         anchors.margins: 10
+        width: height
 
         Image {
             anchors.fill: parent
@@ -317,6 +340,26 @@ ApplicationWindow {
                 }
                 onPreviewExited: {
                     releasePreview()
+                }
+            }
+
+            Button {
+                id: newButton
+                anchors.left: parent.left
+                anchors.bottom: loadButton.top
+                anchors.leftMargin: parent.width * 0.02
+                anchors.bottomMargin: parent.width * 0.02
+                text: qsTr("&New")
+                iconName: "document-new"
+
+                onClicked: {
+                    currentFile = ""
+                    loadPinmux()
+                }
+
+                action: Action {
+                    shortcut: "Ctrl+N"
+                    tooltip: qsTr("Create a new config")
                 }
             }
 
