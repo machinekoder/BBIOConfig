@@ -12,5 +12,8 @@
         <file>qml/OverlaySelector.qml</file>
         <file>qml/colormap.txt</file>
         <file>qml/ConfigModeSelector.qml</file>
+        <file>qml/colormap1.txt</file>
+        <file>qml/colormap2.txt</file>
+        <file>qml/Functions.js</file>
     </qresource>
 </RCC>

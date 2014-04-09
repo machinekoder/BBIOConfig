@@ -24,7 +24,10 @@ OTHER_FILES += \
     qml/ToolTipArea.qml \
     qml/OverlaySelector.qml \
     qml/colormap.txt \
-    qml/ConfigModeSelector.qml
+    qml/ConfigModeSelector.qml \
+    qml/colormap1.txt \
+    qml/colormap2.txt \
+    qml/Functions.js
 
 HEADERS += \
     fileio.h

@@ -13,15 +13,19 @@ Rectangle {
     property string previewType: ""                                                     // type for preview mode
     property bool   previewEnabled: false                                               // enabled the preview mdoe
     property bool   previewActive:  getPreviewActive()                                  // holds whether the preview is active or not
-    property string gpioDirection: "in"                                                 // type of the gpio pin (in or out)
-    property string gpioValue: "hi"                                                     // startup gpio value
+    property string gpioDirection: "unmodified"                                         // type of the gpio pin (in or out)
+    property var    gpioDirections: ["unmodified", "in", "out"]
+    property string gpioValue: "unmodified"                                             // startup gpio value
+    property var    gpioValues: ["unmodifed", "low", "high"]
     property int    number: 0                                                           // number of the pin
     property var    colorMap: [["GPIO", "red"], ["I2C", "blue"], ["UART", "green"]]     // current avtive color map
     property alias  numberVisible: numberText.visible                                   // visibility of the number
     property string description: "Test"                                                 // descriptive text for the pin
-    property bool   editable: pinmuxActive                                              // editability of the pin
+    property bool   editable: getEditable()                                             // editability of the pin
     property var    textInput: leftTextInput.visible? leftTextInput: rightTextInput     // currently active text input
     property string infoText: getInfoText()                                             // info text for the pin
+    property int    configMode: 0                                                       // active config mode: 0=function, 1=gpio dir, 2=gpio value
+    property double uneditableOpacitiy: (configMode == 0)?1.0:0.2
 
     signal previewEntered(string type)
     signal previewExited()
@@ -30,7 +34,16 @@ Rectangle {
     width: 100
     height: 62
     color: getColor()
-    opacity: (editable || previewActive || (previewEnabled && previewType == ""))?1.0:0.8
+    opacity: (editable || previewActive || (previewEnabled && previewType == ""))?1.0:uneditableOpacitiy
+
+    function getEditable() {
+        switch (configMode) {
+        case 0: return pinmuxActive
+        case 1: return (type === "gpio")
+        case 2: return ((type === "gpio") && (gpioDirection === "out"))
+        default: return false
+        }
+    }
 
     function getInfoText() {
         var functionIndex = functions.indexOf((previewActive?previewType:type))
@@ -49,11 +62,29 @@ Rectangle {
     }
 
     function getColor() {
-        for (var i = 0; i < colorMap.length; ++i)
+        var searchValue
+
+        if (main.configMode == 1) {
+            searchValue = main.gpioDirection
+        }
+        else if (main.configMode == 2) {
+            searchValue = main.gpioValue
+        }
+        else if (main.previewActive) {
+            searchValue = main.previewType
+        }
+        else if (main.pinmuxActive) {
+            searchValue = main.type
+        }
+        else {
+            searchValue = main.defaultFunction
+        }
+
+        for (var i = 0; i < main.colorMap.length; ++i)
         {
-            if (colorMap[i][0] === ((previewActive)?previewType:(pinmuxActive?type:defaultFunction)))
+            if (main.colorMap[i][0] === searchValue)
             {
-                return colorMap[i][1]
+                return main.colorMap[i][1]
             }
         }
         return "grey"
@@ -87,24 +118,60 @@ Rectangle {
     ComboBox {
         id: comboBox
         anchors.fill: parent
-        model: functions
+        model: main.functions
         style: ComboBoxStyle {
             background: Item {}
             label: Item {}
         }
-        visible: main.editable
+        visible: (main.editable && (main.configMode == 0))
 
-        Binding { target: main; property: "type"; value: comboBox.currentText }
-        Binding { target: comboBox; property: "currentText"; value: main.type }
+        Binding { target: main; property: "type"; value: comboBox.currentText}
+        Binding { target: comboBox; property: "currentText"; value: main.type}
 
-        Keys.onMenuPressed: {
-            textInput.forceActiveFocus()
+        Keys.onPressed: {
+            if ((event.key === Qt.Key_Menu) || (event.key === Qt.Key_Tab) || (event.key === Qt.Key_Return)) {
+                textInput.forceActiveFocus()
+            }
         }
-        Keys.onTabPressed: {
-            textInput.forceActiveFocus()
+    }
+
+    ComboBox {
+        id: comboBox2
+        anchors.fill: parent
+        model: main.gpioDirections
+        style: ComboBoxStyle {
+            background: Item {}
+            label: Item {}
         }
-        Keys.onReturnPressed: {
-            textInput.forceActiveFocus()
+        visible: (main.editable && (main.configMode == 1))
+
+        Binding { target: main; property: "gpioDirection"; value: comboBox2.currentText}
+        Binding { target: comboBox2; property: "currentText"; value: main.gpioDirection}
+
+        Keys.onPressed: {
+            if ((event.key === Qt.Key_Menu) || (event.key === Qt.Key_Tab) || (event.key === Qt.Key_Return)) {
+                textInput.forceActiveFocus()
+            }
+        }
+    }
+
+    ComboBox {
+        id: comboBox3
+        anchors.fill: parent
+        model: main.gpioValues
+        style: ComboBoxStyle {
+            background: Item {}
+            label: Item {}
+        }
+        visible: (main.editable && (main.configMode == 2))
+
+        Binding { target: main; property: "gpioValue"; value: comboBox3.currentText}
+        Binding { target: comboBox3; property: "currentText"; value: main.gpioValue}
+
+        Keys.onPressed: {
+            if ((event.key === Qt.Key_Menu) || (event.key === Qt.Key_Tab) || (event.key === Qt.Key_Return)) {
+                textInput.forceActiveFocus()
+            }
         }
     }
 
@@ -128,11 +195,16 @@ Rectangle {
         Binding { target: main; property: "description"; value: rightTextInput.text }
         Binding { target: rightTextInput; property: "text"; value: main.description }
 
-        Keys.onMenuPressed: {
-            comboBox.forceActiveFocus()
-        }
-        Keys.onReturnPressed: {
-            comboBox.forceActiveFocus()
+        Keys.onPressed: {
+            if ((event.key === Qt.Key_Menu) || (event.key === Qt.Key_Return)) {
+                var target
+                switch (main.configMode) {
+                case 0: target = comboBox; break;
+                case 1: target = comboBox2; break;
+                case 2: target = comboBox3; break;
+                }
+                target.forceActiveFocus()
+            }
         }
     }
 
@@ -167,11 +239,16 @@ Rectangle {
         Binding { target: main; property: "description"; value: leftTextInput.text}
         Binding { target: leftTextInput; property: "text"; value: main.description}
 
-        Keys.onMenuPressed: {
-            comboBox.forceActiveFocus()
-        }
-        Keys.onReturnPressed: {
-            comboBox.forceActiveFocus()
+        Keys.onPressed: {
+            if ((event.key === Qt.Key_Menu) || (event.key === Qt.Key_Return)) {
+                var target
+                switch (main.configMode) {
+                case 0: target = comboBox; break;
+                case 1: target = comboBox2; break;
+                case 2: target = comboBox3; break;
+                }
+                target.forceActiveFocus()
+            }
         }
     }
 

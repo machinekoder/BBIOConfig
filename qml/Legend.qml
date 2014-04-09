@@ -6,6 +6,8 @@ GroupBox {
     property var pinList: []
     property string previewType: ""
     property bool previewEnabled: false
+    property int pinSize: main.width*0.125
+    property int pinSpacing: 2
 
     id: main
     width: 100
@@ -28,10 +30,9 @@ GroupBox {
         id: grid
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        //width: parent.width *0.2
         columns: 1
         rows: colorMap.length
-        spacing: 2
+        spacing: main.pinSpacing
     }
 
     function refreshPins() {
@@ -46,7 +47,7 @@ GroupBox {
             createPin(i)
         }
 
-        main.height = colorMap.length * main.width*0.155
+        main.height = colorMap.length * (main.pinSize + main.pinSpacing) + 30
     }
 
     function createPin(number) {
@@ -57,8 +58,8 @@ GroupBox {
         numberVisible =  false
 
          component = Qt.createComponent("Pin.qml");
-         sprite = component.createObject(grid, {"width": main.width*0.125,
-                                             "height": main.width*0.125,
+         sprite = component.createObject(grid, {"width": Qt.binding(function(){return main.pinSize}),
+                                             "height": Qt.binding(function(){return main.pinSize}),
                                              "number": number*2,
                                              "numberVisible": numberVisible,
                                              "description": main.colorMap[number][0],

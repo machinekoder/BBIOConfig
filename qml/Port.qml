@@ -6,6 +6,7 @@ Rectangle {
     property var loadedOverlays: []
     property string previewType: ""
     property bool previewEnabled: false
+    property int configMode: 0
 
     id: main
 
@@ -46,7 +47,8 @@ Rectangle {
                                              "functions": [],
                                              "loadedOverlays": Qt.binding(function(){return main.loadedOverlays}),
                                              "previewType": Qt.binding(function(){return main.previewType}),
-                                             "previewEnabled": Qt.binding(function(){return main.previewEnabled})});
+                                             "previewEnabled": Qt.binding(function(){return main.previewEnabled}),
+                                             "configMode": Qt.binding(function(){return main.configMode})});
 
          if (sprite === null) {
              // Error Handling
