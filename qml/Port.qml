@@ -3,6 +3,9 @@ import QtQuick 2.0
 Rectangle {
     property var pinList: []
     property var currentColorMap: [[["GPIO", "red"], ["I2C", "blue"], ["UART", "green"]]]
+    property var loadedOverlays: []
+    property string previewType: ""
+    property bool previewEnabled: false
 
     id: main
 
@@ -35,12 +38,15 @@ Rectangle {
         numberVisible =  ((number % 10 == 0) || (number % 10 == 9) || (number == 1) || (number == 2))
 
          component = Qt.createComponent("Pin.qml");
-         sprite = component.createObject(grid, {"width": main.width*0.38,
-                                             "height": main.width*0.38,
+         sprite = component.createObject(grid, {"width": Qt.binding(function(){return main.width*0.38}),
+                                             "height": Qt.binding(function(){return main.width*0.38}),
                                              "number": number,
                                              "numberVisible": numberVisible,
-                                             "colorMap": main.currentColorMap,
-                                             "functions": []});
+                                             "colorMap": Qt.binding(function(){return main.currentColorMap}),
+                                             "functions": [],
+                                             "loadedOverlays": Qt.binding(function(){return main.loadedOverlays}),
+                                             "previewType": Qt.binding(function(){return main.previewType}),
+                                             "previewEnabled": Qt.binding(function(){return main.previewEnabled})});
 
          if (sprite === null) {
              // Error Handling

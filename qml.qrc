@@ -7,5 +7,10 @@
         <file>qml/BBB_shape.svg</file>
         <file>qml/Legend.qml</file>
         <file>qml/pinmux.txt</file>
+        <file>qml/ToolTip.qml</file>
+        <file>qml/ToolTipArea.qml</file>
+        <file>qml/OverlaySelector.qml</file>
+        <file>qml/colormap.txt</file>
+        <file>qml/ConfigModeSelector.qml</file>
     </qresource>
 </RCC>

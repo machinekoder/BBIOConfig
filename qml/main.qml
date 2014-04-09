@@ -8,11 +8,12 @@ ApplicationWindow {
     property string currentFile: ""
 
     visible: true
-    width: 800
+    width: 1000
     height: 800
     title: qsTr("BBB Pin Configurator")
 
     Component.onCompleted: {
+        selector.currentColorMap = loadColorMap()
         loadPinmux()
 
         for (var i = 0; i < portList.length; ++i)
@@ -24,6 +25,7 @@ ApplicationWindow {
     function loadPinmux()
     {
         var functions = []
+        var capes = []
 
         configFile.url = ":/qml/pinmux.txt"
         configFile.load()
@@ -43,9 +45,9 @@ ApplicationWindow {
                 pin.functions = ["reserved"]
                 pin.info = ["reserved"]
                 pin.type = "reserved"
-                pin.editable = false
+                //pin.editable = false
                 pin.description = ""
-                pin.cape = ""
+                pin.overlay = ""
             }
         }
 
@@ -62,39 +64,49 @@ ApplicationWindow {
             var functionsData = lineData[1].split(" ")
             var pinmuxData = lineData[0].split("_")         // split the left side into port, pin and type
 
-            for (var j = 0; j < functionsData.length; ++j)  // convert the right side into a list of strings
-            {
-                var func = functionsData[j]
-                if (functions.indexOf(func) == -1)          // this has no use yet
-                {
-                    functions.push(func)
-                }
-            }
-
             var port = parseInt(pinmuxData[0].substr(1),10) // Port, P<n>
             var pin = parseInt(pinmuxData[1],10)            // Pin <n>
             var type = pinmuxData[2]                        // Type: PINMUX, INFO, CAPE
+
+            for (var j = 0; j < functionsData.length; ++j)  // convert the right side into a list of strings
+            {
+                var func = functionsData[j]
+
+                switch(type) {
+                case "PINMUX":
+                    if ((functions.indexOf(func) == -1) && (func !== ""))          // this has no use yet
+                    {
+                        functions.push(func)
+                    }
+                    break;
+                case "CAPE":
+                    if ((capes.indexOf(func) == -1) && (func !== ""))          // this has no use yet
+                    {
+                        capes.push(func)
+                    }
+                    break;
+                default:
+                }
+            }
 
             if ((port === 8) || (port === 9))               // BB has only P8 and P9
             {
                 if (pin <= portList[port-8].pinList.length) // BB has 46 pins per port
                 {
                     var targetPin = portList[port-8].pinList[pin-1]
-
-                    console.log(port)
-                    console.log(pin)
-                    console.log(functionsData)
                     switch(type) {
                     case "PINMUX":
                         targetPin.functions = functionsData
-                        targetPin.editable = true
                         targetPin.type = functionsData[0]
+                        break;
+                    case "PIN":
+                        targetPin.defaultFunction = functionsData[0]
                         break;
                     case "INFO":
                         targetPin.info = functionsData
                         break;
                     case "CAPE":
-                        targetPin.cape = functionsData[0]
+                        targetPin.overlay = functionsData[0]
                         break;
                     default:
                     }
@@ -103,6 +115,7 @@ ApplicationWindow {
             }
         }
         console.log(functions)
+        overlaySelector.input = capes
     }
 
     function loadConfig(fileName)
@@ -120,6 +133,9 @@ ApplicationWindow {
 
         if (lines.length === 0)
             return
+
+        var overlays = []
+        overlaySelector.clearSelection()    // clear selected overlays
 
         for (var i = 0; i < lines.length; ++i)
         {
@@ -142,6 +158,16 @@ ApplicationWindow {
             if (lineData.length === 0)
                 continue
 
+            var overlayCheckText = lineData[0].toLowerCase()
+            switch (overlayCheckText) {
+            case "overlay":
+            case "ov":
+            case "cape":
+                overlays.push(lineData[1])
+                continue;
+            default:
+            }
+
             var pinmuxData = lineData[0].split("_")
 
             var port = parseInt(pinmuxData[0].substr(1),10)
@@ -162,11 +188,50 @@ ApplicationWindow {
                 }
             }
         }
+
+        console.log(overlays)
+        for (var i = 0; i < overlays.length; ++i) {
+            overlaySelector.selectOverlay(overlays[i])
+        }
+    }
+
+    function loadColorMap() {
+        configFile.url = ":/qml/colormap.txt"
+        configFile.load()
+
+        if (configFile.error == true)
+        {
+            console.log("file error")
+            return
+        }
+
+        var lines = configFile.data.split("\n")             // split it into seperate lines
+        var colorMap = []
+
+        for (var i = 0; i < lines.length; ++i)
+        {
+            if ((lines[i] === "") || (lines[i][0] === "#"))
+                continue
+
+            var data = lines[i].replace(/\s+/g, ' ').split(" ")
+            colorMap.push(data)
+        }
+
+        return colorMap
     }
 
     function saveConfig(fileName) {
         var data = ""
 
+        data += "# File generated with BB pin configurator\n"
+
+        // exporting overlays
+        for (var i = 0; i < overlaySelector.output.length; ++i)
+        {
+            data += "overlay " + overlaySelector.output[i] + "\n"
+        }
+
+        // exporting pins
         for (var i = 0; i < portList.length; ++i)
         {
             var port = i+8
@@ -199,247 +264,229 @@ ApplicationWindow {
         }
     }
 
-    function setPreviewType(type) {
-        for (var i = 0; i < portList.length; ++i)
-        {
-            for (var j = 0; j < portList[i].pinList.length; ++j)
-            {
-                var sourcePin = portList[i].pinList[j]
-
-                if (sourcePin.functions.indexOf(type) != -1)
-                {
-                    sourcePin.previewType = type
-                    sourcePin.previewEnabled = true
-                }
-            }
-        }
-    }
-
-    function releasePreview() {
-        for (var i = 0; i < portList.length; ++i)
-        {
-            for (var j = 0; j < portList[i].pinList.length; ++j)
-            {
-                var sourcePin = portList[i].pinList[j]
-                sourcePin.previewEnabled = false
-            }
-        }
-    }
-
     File {
         id: configFile
     }
 
     Rectangle {
-        property var currentColorMap: [
-            ["reserved", "black"],
-            ["default", "grey"],
-            ["gpio", "#0000FF"],
-            ["gpio_pu", "#000088"],
-            ["gpio_pd", "#4444FF"],
-            ["pruout", "darkgreen"],
-            ["pruin", "green"],
-            ["pwm", "#FF0000"],
-            ["pwm2", "#FF4444"],
-            ["uart", "#662222"],
-            ["i2c", "#00FFFF"],
-            ["spi", "#FF00FF"],
-            ["spics", "#AA00AA"],
-            ["spiclk", "#FF44FF"],
-            ["can", "#AAFFAA"],
-            ["qep", "orange"],
-            ["timer", "yellow"],]
+        color: "white"
+        anchors.fill: parent
 
-        id: selector
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.margins: 10
-        width: height
+        OverlaySelector {
+            id: overlaySelector
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.leftMargin: selector.width * 0.02
+            anchors.topMargin: selector.width * 0.09
+            width: selector.width * 0.2
+            height: selector.height * 0.14
+            title: qsTr("Overlays")
+        }
 
-        Image {
-            anchors.fill: parent
-            source: "BBB_shape.svg"
-            fillMode: Image.PreserveAspectFit
+        ConfigModeSelector {
+            id: configModeSelector
+            anchors.left: parent.left
+            anchors.top: overlaySelector.bottom
+            anchors.leftMargin: selector.width * 0.02
+            anchors.topMargin: selector.width * 0.02
+            width: selector.width * 0.2
+            height: selector.height * 0.14
+            title: qsTr("Config Mode")
+            input: [qsTr("Pin function"), qsTr("GPIO direction"), qsTr("GPIO value")]
+        }
 
-            Text {
-                id: fileNameText
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                text: currentFile
+        Legend {
+            id: legend
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.rightMargin: selector.width * 0.02
+            anchors.bottomMargin: selector.height * 0.05
+            width: selector.width * 0.16
+            colorMap: selector.currentColorMap
+        }
+
+        Button {
+            id: newButton
+            anchors.left: parent.left
+            anchors.bottom: loadButton.top
+            anchors.leftMargin: selector.width * 0.02
+            anchors.bottomMargin: selector.width * 0.02
+            text: qsTr("&New")
+            iconName: "document-new"
+
+            onClicked: {
+                currentFile = ""
+                loadPinmux()
             }
 
-            Text {
-                id: titleText
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-                anchors.topMargin: parent.height * 0.01
-                font.pixelSize: parent.width * 0.03
-                font.bold: true
-                text: qsTr("BeagleBone Universal IO Configurator")
+            action: Action {
+                shortcut: "Ctrl+N"
+                tooltip: qsTr("Create a new config")
             }
+        }
 
-            Port {
-                id: port9
+        Button {
+            id: loadButton
+            anchors.left: parent.left
+            anchors.bottom: saveAsButton.top
+            anchors.leftMargin: selector.width * 0.02
+            anchors.bottomMargin: selector.width * 0.02
+            text: qsTr("&Open...")
+            iconName: "document-open"
 
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                width: parent.width * 0.054
-                anchors.topMargin: parent.height * 0.265
-                anchors.bottomMargin: parent.height * 0.18
-                anchors.leftMargin: parent.width * 0.245
-                currentColorMap: selector.currentColorMap
+            onClicked: fileOpenDialog.visible = true
+
+            action: Action {
+                shortcut: "Ctrl+O"
+                tooltip: qsTr("Open a config file..")
             }
+        }
 
-            Text {
-                text: "P9"
-                color: "grey"
-                anchors.top: port9.bottom
-                anchors.topMargin: parent.height*0.01
-                anchors.horizontalCenter: port9.horizontalCenter
-                anchors.horizontalCenterOffset: parent.width * 0.03
-                font.pixelSize: parent.width * 0.04
+        Button {
+            id: saveAsButton
+            anchors.left: parent.left
+            anchors.bottom: saveButton.top
+            anchors.leftMargin: selector.width * 0.02
+            anchors.bottomMargin: selector.width * 0.02
+            text: qsTr("Save &As..")
+            iconName: "document-save-as"
+
+            onClicked: fileSaveDialog.visible = true
+
+            action: Action {
+                shortcut: "Ctrl+Shift+S"
+                tooltip: qsTr("Saves the config file as..")
             }
+        }
 
-            Port {
-                id: port8
+        Button {
+            id: saveButton
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            anchors.leftMargin: selector.width * 0.02
+            anchors.bottomMargin: selector.width * 0.02
+            text: qsTr("&Save")
+            iconName: "document-save"
 
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.right: parent.right
-                width: parent.width * 0.054
-                anchors.topMargin: parent.height * 0.265
-                anchors.bottomMargin: parent.height * 0.18
-                anchors.rightMargin: parent.width * 0.245
-                currentColorMap: selector.currentColorMap
+            onClicked: currentFile == "" ? fileSaveDialog.visible = true : saveConfig(currentFile)
+
+            action: Action {
+                shortcut: "Ctrl+S"
+                tooltip: qsTr("Saves the config file")
             }
+        }
 
-            Text {
-                text: "P8"
-                color: "grey"
-                anchors.top: port8.bottom
-                anchors.topMargin: parent.height*0.01
-                anchors.horizontalCenter: port8.horizontalCenter
-                anchors.horizontalCenterOffset: -parent.width * 0.03
-                font.pixelSize: parent.width * 0.04
+        Text {
+            id: fileNameText
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            text: currentFile
+        }
+
+        FileDialog {
+            id: fileOpenDialog
+            title: qsTr("Please choose a io file")
+            selectExisting: true
+            nameFilters: [ "BB Universion IO file (*.bbio)", "All files (*)" ]
+            onAccepted: {
+                currentFile = fileUrl
+                loadPinmux()
+                loadConfig(fileUrl)
             }
+            onRejected: {
+                console.log("Canceled")
+            }
+        }
 
-            Legend {
-                id: legend
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                anchors.rightMargin: parent.width * 0.02
-                anchors.bottomMargin: parent.height * 0.02
-                width: parent.width * 0.13
-                height: parent.height * 0.4
-                colorMap: selector.currentColorMap
+        FileDialog {
+            id: fileSaveDialog
+            title: qsTr("Please choose a io file")
+            selectExisting: false
+            nameFilters: [ "BB Universion IO file (*.bbio)", "All files (*)" ]
+            onAccepted: {
+                currentFile = fileUrl
+                saveConfig(fileUrl)
+            }
+            onRejected: {
+                console.log("Canceled")
+            }
+        }
 
-                onPreviewEntered: {
-                    setPreviewType(type)
+        Item {
+            property var currentColorMap: []
+
+            id: selector
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.margins: 10
+            width: height
+
+            Image {
+                anchors.fill: parent
+                source: "BBB_shape.svg"
+                fillMode: Image.PreserveAspectFit
+
+                Text {
+                    id: titleText
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.top
+                    anchors.topMargin: parent.height * 0.01
+                    font.pixelSize: parent.width * 0.03
+                    font.bold: true
+                    text: qsTr("BeagleBone Universal IO Configurator")
                 }
-                onPreviewExited: {
-                    releasePreview()
-                }
-            }
 
-            Button {
-                id: newButton
-                anchors.left: parent.left
-                anchors.bottom: loadButton.top
-                anchors.leftMargin: parent.width * 0.02
-                anchors.bottomMargin: parent.width * 0.02
-                text: qsTr("&New")
-                iconName: "document-new"
+                Port {
+                    id: port9
 
-                onClicked: {
-                    currentFile = ""
-                    loadPinmux()
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
+                    width: parent.width * 0.054
+                    anchors.topMargin: parent.height * 0.265
+                    anchors.bottomMargin: parent.height * 0.18
+                    anchors.leftMargin: parent.width * 0.245
+                    currentColorMap: selector.currentColorMap
+                    loadedOverlays: overlaySelector.output
+                    previewType: legend.previewType
+                    previewEnabled: legend.previewEnabled
                 }
 
-                action: Action {
-                    shortcut: "Ctrl+N"
-                    tooltip: qsTr("Create a new config")
+                Text {
+                    text: "P9"
+                    color: "grey"
+                    anchors.top: port9.bottom
+                    anchors.topMargin: parent.height*0.01
+                    anchors.horizontalCenter: port9.horizontalCenter
+                    anchors.horizontalCenterOffset: parent.width * 0.03
+                    font.pixelSize: parent.width * 0.04
                 }
-            }
 
-            Button {
-                id: loadButton
-                anchors.left: parent.left
-                anchors.bottom: saveAsButton.top
-                anchors.leftMargin: parent.width * 0.02
-                anchors.bottomMargin: parent.width * 0.02
-                text: qsTr("&Open...")
-                iconName: "document-open"
+                Port {
+                    id: port8
 
-                onClicked: fileOpenDialog.visible = true
-
-                action: Action {
-                    shortcut: "Ctrl+O"
-                    tooltip: qsTr("Open a config file..")
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.right: parent.right
+                    width: parent.width * 0.054
+                    anchors.topMargin: parent.height * 0.265
+                    anchors.bottomMargin: parent.height * 0.18
+                    anchors.rightMargin: parent.width * 0.245
+                    currentColorMap: selector.currentColorMap
+                    loadedOverlays: overlaySelector.output
+                    previewType: legend.previewType
+                    previewEnabled: legend.previewEnabled
                 }
-            }
 
-            Button {
-                id: saveAsButton
-                anchors.left: parent.left
-                anchors.bottom: saveButton.top
-                anchors.leftMargin: parent.width * 0.02
-                anchors.bottomMargin: parent.width * 0.02
-                text: qsTr("Save &As..")
-                iconName: "document-save-as"
-
-                onClicked: fileSaveDialog.visible = true
-
-                action: Action {
-                    shortcut: "Ctrl+Shift+S"
-                    tooltip: qsTr("Saves the config file as..")
-                }
-            }
-
-            Button {
-                id: saveButton
-                anchors.left: parent.left
-                anchors.bottom: parent.bottom
-                anchors.leftMargin: parent.width * 0.02
-                anchors.bottomMargin: parent.width * 0.02
-                text: qsTr("&Save")
-                iconName: "document-save"
-
-                onClicked: currentFile == "" ? fileSaveDialog.visible = true : saveConfig(currentFile)
-
-                action: Action {
-                    shortcut: "Ctrl+S"
-                    tooltip: qsTr("Saves the config file")
-                }
-            }
-
-            FileDialog {
-                id: fileOpenDialog
-                title: qsTr("Please choose a io file")
-                selectExisting: true
-                nameFilters: [ "BB Universion IO file (*.bbio)", "All files (*)" ]
-                onAccepted: {
-                    currentFile = fileUrl
-                    loadPinmux()
-                    loadConfig(fileUrl)
-                }
-                onRejected: {
-                    console.log("Canceled")
-                }
-            }
-
-            FileDialog {
-                id: fileSaveDialog
-                title: qsTr("Please choose a io file")
-                selectExisting: false
-                nameFilters: [ "BB Universion IO file (*.bbio)", "All files (*)" ]
-                onAccepted: {
-                    currentFile = fileUrl
-                    saveConfig(fileUrl)
-                }
-                onRejected: {
-                    console.log("Canceled")
+                Text {
+                    text: "P8"
+                    color: "grey"
+                    anchors.top: port8.bottom
+                    anchors.topMargin: parent.height*0.01
+                    anchors.horizontalCenter: port8.horizontalCenter
+                    anchors.horizontalCenterOffset: -parent.width * 0.03
+                    font.pixelSize: parent.width * 0.04
                 }
             }
         }

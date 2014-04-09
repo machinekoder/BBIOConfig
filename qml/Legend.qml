@@ -1,15 +1,15 @@
 import QtQuick 2.0
+import QtQuick.Controls 1.0
 
-Item {
+GroupBox {
     property var colorMap: [["GPIO", "red"], ["I2C", "blue"], ["UART", "green"]]
     property var pinList: []
-
-    signal previewEntered(string type)
-    signal previewExited()
+    property string previewType: ""
+    property bool previewEnabled: false
 
     id: main
     width: 100
-    height: 62
+    title: qsTr("Legend")
 
     Component.onCompleted: {
         refreshPins()
@@ -28,7 +28,7 @@ Item {
         id: grid
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        width: parent.width *0.2
+        //width: parent.width *0.2
         columns: 1
         rows: colorMap.length
         spacing: 2
@@ -45,6 +45,8 @@ Item {
         {
             createPin(i)
         }
+
+        main.height = colorMap.length * main.width*0.155
     }
 
     function createPin(number) {
@@ -55,8 +57,8 @@ Item {
         numberVisible =  false
 
          component = Qt.createComponent("Pin.qml");
-         sprite = component.createObject(grid, {"width": main.width*0.15,
-                                             "height": main.width*0.15,
+         sprite = component.createObject(grid, {"width": main.width*0.125,
+                                             "height": main.width*0.125,
                                              "number": number*2,
                                              "numberVisible": numberVisible,
                                              "description": main.colorMap[number][0],
@@ -76,4 +78,13 @@ Item {
 
          main.pinList.push(sprite)
      }
+
+    function previewEntered(type) {
+        main.previewType = type
+        main.previewEnabled = true
+    }
+
+    function previewExited() {
+        main.previewEnabled = false
+    }
 }

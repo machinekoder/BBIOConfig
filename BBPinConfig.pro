@@ -19,7 +19,12 @@ OTHER_FILES += \
     qml/Port.qml \
     qml/Legend.qml \
     qml/pinmux.txt \
-    qml/testconfig.txt
+    qml/testconfig.txt \
+    qml/ToolTip.qml \
+    qml/ToolTipArea.qml \
+    qml/OverlaySelector.qml \
+    qml/colormap.txt \
+    qml/ConfigModeSelector.qml
 
 HEADERS += \
     fileio.h
