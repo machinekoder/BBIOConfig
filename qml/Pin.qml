@@ -145,7 +145,16 @@ Rectangle {
         visible: (main.editable && (main.configMode == 0))
 
         Binding { target: main; property: "type"; value: comboBox.currentText}
-        Binding { target: comboBox; property: "currentText"; value: main.type}
+        //Binding { target: comboBox; property: "currentText"; value: main.type}    // This binding does not do what it should do
+        Timer {                                                                     // and this is the reason for this timer
+            repeat: true                                                            // updating the index of the combo box
+            interval: 100
+            running: parent.visible
+            onTriggered: {
+                if (parent.currentText !== main.type)
+                    parent.currentIndex = parent.model.indexOf(main.type)
+            }
+        }
 
         Keys.onPressed: {
             if ((event.key === Qt.Key_Menu) || (event.key === Qt.Key_Tab) || (event.key === Qt.Key_Return)) {
@@ -165,7 +174,16 @@ Rectangle {
         visible: (main.editable && (main.configMode == 1))
 
         Binding { target: main; property: "gpioDirection"; value: comboBox2.currentText}
-        Binding { target: comboBox2; property: "currentText"; value: main.gpioDirection}
+        //Binding { target: comboBox2; property: "currentText"; value: main.gpioDirection}  // This binding does not do what it should do
+        Timer {                                                                             // and this is the reason for this timer
+            repeat: true                                                                    // updating the index of the combo box
+            interval: 100
+            running: parent.visible
+            onTriggered: {
+                if (parent.currentText !== main.gpioDirection)
+                    parent.currentIndex = parent.model.indexOf(main.gpioDirection)
+            }
+        }
 
         Keys.onPressed: {
             if ((event.key === Qt.Key_Menu) || (event.key === Qt.Key_Tab) || (event.key === Qt.Key_Return)) {
@@ -185,7 +203,16 @@ Rectangle {
         visible: (main.editable && (main.configMode == 2))
 
         Binding { target: main; property: "gpioValue"; value: comboBox3.currentText}
-        Binding { target: comboBox3; property: "currentText"; value: main.gpioValue}
+        //Binding { target: comboBox3; property: "currentText"; value: main.gpioValue}      // This binding does not do what it should do
+        Timer {                                                                             // and this is the reason for this timer
+            repeat: true                                                                    // updating the index of the combo box
+            interval: 100
+            running: parent.visible
+            onTriggered: {
+                if (parent.currentText !== main.gpioValue)
+                    parent.currentIndex = parent.model.indexOf(main.gpioValue)
+            }
+        }
 
         Keys.onPressed: {
             if ((event.key === Qt.Key_Menu) || (event.key === Qt.Key_Tab) || (event.key === Qt.Key_Return)) {
