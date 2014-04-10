@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>qml/main.qml</file>
         <file>qml/Pin.qml</file>
-        <file>qml/MenuEntry.qml</file>
         <file>qml/Port.qml</file>
         <file>qml/BBB_shape.svg</file>
         <file>qml/Legend.qml</file>

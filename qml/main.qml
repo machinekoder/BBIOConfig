@@ -1,3 +1,22 @@
+/*****************************************************************************
+    Copyright (c) 2014 Alexander Rössler <mail.aroessler@gmail.com>
+
+    This file is part of BBPinConfig.
+
+    BBIOConfig is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    BBIOConfig is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with BBIOConfig.  If not, see <http://www.gnu.org/licenses/>.
+
+ *****************************************************************************/
 import QtQuick 2.2
 import QtQuick.Controls 1.1
 import QtQuick.Dialogs 1.1
@@ -14,7 +33,7 @@ ApplicationWindow {
     visible: true
     width: 1000
     height: 800
-    title: qsTr("BBB Pin Configurator")
+    title: qsTr("BB Universal IO Configurator (BBIOConfig)")
 
     Component.onCompleted: {
         functionColorMap = Functions.loadColorMap(":/qml/colormap.txt")
@@ -101,6 +120,15 @@ ApplicationWindow {
         Menu {
             title: qsTr("&Help")
             MenuItem {
+                text: qsTr("&Online Documentation")
+                iconName: "help-contents"
+
+                onTriggered: Qt.openUrlExternally("https://github.com/strahlex/BBIOConfig/wiki")
+            }
+
+            MenuSeparator {}
+
+            MenuItem {
                 text: qsTr("&About")
                 iconName: "help-about"
 
@@ -111,10 +139,22 @@ ApplicationWindow {
 
     MessageDialog {
         id: aboutDialog
-        title: qsTr("About BBPinConfig")
-        text: qsTr("<h2>BeagleBone Universal IO Configurator</h2> <br>" +
-                   "Copyright 2014 by Alexander Rössler <br>" +
-                   "<a href='mailto:mail.aroessler@gmail.com'>mail.aroessler@gmail.com</a>")
+        title: qsTr("About BBIOConfig")
+        text: qsTr("<h2>BeagleBone Universal IO Configurator<br>" +
+                   "BBIOConfig</h2> <br>" +
+                   "Copyright (C) 2014 by Alexander Rössler (<a href='mailto:mail.aroessler@gmail.com'>mail.aroessler@gmail.com</a>)<br><br>" +
+                   "BBIOConfig is free software: you can redistribute it and/or modify<br>" +
+                   "it under the terms of the GNU General Public License as published by<br>" +
+                   "the Free Software Foundation, either version 3 of the License, or<br>" +
+                   "(at your option) any later version.<br><br>" +
+
+                   "BBIOConfig is distributed in the hope that it will be useful,<br>" +
+                   "but WITHOUT ANY WARRANTY; without even the implied warranty of<br>" +
+                   "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<br>" +
+                   "GNU General Public License for more details.<br><br>" +
+
+                   "You should have received a copy of the GNU General Public License<br>" +
+                   "along with BBIOConfig.  If not, see <http://www.gnu.org/licenses/>.<br>")
     }
 
     File {
