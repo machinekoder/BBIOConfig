@@ -44,6 +44,8 @@ function loadPinmux()
             pin.overlay = ""
             pin.gpioDirection = "unmodidied"
             pin.gpioValue = "unmodified"
+            pin.kernelPinNumber = 0
+            pin.pruPinNumber = 0
         }
     }
 
@@ -104,6 +106,12 @@ function loadPinmux()
                 case "CAPE":
                     targetPin.overlay = functionsData[0]
                     break;
+                case "PRU":
+                    targetPin.pruPinNumber = parseInt(functionsData[0])
+                    break;
+                case "GPIO":
+                    targetPin.kernelPinNumber = parseInt(functionsData[0])
+                    break;
                 default:
                 }
 
@@ -157,12 +165,17 @@ function loadConfig(fileName)
 
     var overlays = []
     overlaySelector.clearSelection()    // clear selected overlays
+    documentTitle = ""
 
     for (var i = 0; i < lines.length; ++i)
     {
         var line = lines[i]
+        var titleText = "# title: "
 
-        if ((line.length === 0) || (line[0] === "#")) // skip empty and comment lines
+        if (line.indexOf(titleText)  === 0)             // get the document title
+            documentTitle = line.substring(titleText.length)
+
+        if ((line.length === 0) || (line[0] === "#"))   // skip empty and comment lines
             continue;
 
         var lineDataRaw = line.split(" ")
@@ -206,30 +219,79 @@ function loadConfig(fileName)
                 var targetPin = portList[port-8].pinList[pin-1]
 
                 //right hand value
-                if ((lineData[1] === "in") || (lineData[1] === "input"))
-                {
+                switch (lineData[1].toLowerCase()) {
+                case "in":
+                case "input":
                     targetPin.type = "gpio"
                     targetPin.gpioDirection = "in"
-                }
-                else if ((lineData[1] === "out") || (lineData[1] === "output"))
-                {
+                    break;
+                case "out":
+                case "output":
                     targetPin.type = "gpio"
                     targetPin.gpioDirection = "out"
-                }
-                else if ((lineData[1] === "hi") || (lineData[1] === "high") || (lineData[1] === "1"))
-                {
+                    break;
+                case "hi":
+                case "high":
+                case "1":
                     targetPin.type = "gpio"
                     targetPin.gpioDirection = "out"
                     targetPin.gpioValue = "high"
-                }
-                else if ((lineData[1] === "lo") || (lineData[1] === "low") || (lineData[1] === "0"))
-                {
+                    break;
+                case "lo":
+                case "low":
+                case "0":
                     targetPin.type = "gpio"
                     targetPin.gpioDirection = "out"
                     targetPin.gpioValue = "low"
-                }
-                else
-                {
+                    break;
+                case "in+":
+                case "input+":
+                    targetPin.type = "gpio_pu"
+                    targetPin.gpioDirection = "in"
+                    break;
+                case "in-":
+                case "input-":
+                    targetPin.type = "gpio_pd"
+                    targetPin.gpioDirection = "in"
+                    break
+                case "out+":
+                case "output+":
+                    targetPin.type = "gpio_pu"
+                    targetPin.gpioDirection = "out"
+                    break;
+                case "out-":
+                case "output-":
+                    targetPin.type = "gpio_pd"
+                    targetPin.gpioDirection = "out"
+                    break;
+                case "hi+":
+                case "high+":
+                case "1+":
+                    targetPin.type = "gpio_pu"
+                    targetPin.gpioDirection = "out"
+                    targetPin.gpioValue = "high"
+                    break;
+                case "hi-":
+                case "high-":
+                case "1-":
+                    targetPin.type = "gpio_pd"
+                    targetPin.gpioDirection = "out"
+                    targetPin.gpioValue = "high"
+                    break;
+                case "lo+":
+                case "low+":
+                case "0+":
+                    targetPin.type = "gpio_pu"
+                    targetPin.gpioDirection = "out"
+                    targetPin.gpioValue = "low"
+                    break;
+                case "lo-":
+                case "low-":
+                case "0-":
+                    targetPin.type = "gpio_pd"
+                    targetPin.gpioDirection = "out"
+                    targetPin.gpioValue = "low"
+                default:
                     targetPin.type = lineData[1]
                 }
 
@@ -253,6 +315,7 @@ function saveConfig(fileName) {
     var data = ""
 
     data += "# File generated with BB pin configurator\n"
+    data += "# title: " + documentTitle + "\n"
 
     // exporting overlays
     for (var i = 0; i < overlaySelector.output.length; ++i)
@@ -292,6 +355,36 @@ function saveConfig(fileName) {
                     command += "gpio"
                 }
             }
+            else if (sourcePin.type === "gpio_pu")
+            {
+                if ((sourcePin.gpioValue !== "unmodified") && (sourcePin.gpioDirection === "out"))
+                {
+                    command += sourcePin.gpioValue + "+"
+                }
+                else if (sourcePin.gpioDirection !== "unmodified")
+                {
+                    command += sourcePin.gpioDirection + "+"
+                }
+                else
+                {
+                    command += "gpio_pu"
+                }
+            }
+            else if (sourcePin.type === "gpio_pd")
+            {
+                if ((sourcePin.gpioValue !== "unmodified") && (sourcePin.gpioDirection === "out"))
+                {
+                    command += sourcePin.gpioValue + "-"
+                }
+                else if (sourcePin.gpioDirection !== "unmodified")
+                {
+                    command += sourcePin.gpioDirection + "-"
+                }
+                else
+                {
+                    command += "gpio_pd"
+                }
+            }
             else
             {
                 command += sourcePin.type
@@ -314,4 +407,30 @@ function saveConfig(fileName) {
     {
         console.log("file error")
     }
+}
+
+function rgb2hsv (color) {
+ var computedH = 0;
+ var computedS = 0;
+ var computedV = 0;
+ var r = color.r;
+ var g = color.g;
+ var b = color.b;
+
+ var minRGB = Math.min(r,Math.min(g,b));
+ var maxRGB = Math.max(r,Math.max(g,b));
+
+ // Black-gray-white
+ if (minRGB === maxRGB) {
+  computedV = minRGB;
+  return {h: 0, s: 0, v: computedV};
+ }
+
+ // Colors other than black-gray-white:
+ var d = (r === minRGB) ? g-b : ((b === minRGB) ? r-g : b-r);
+ var h = (r === minRGB) ? 3 : ((b === minRGB) ? 1 : 5);
+ computedH = 60*(h - d/(maxRGB - minRGB));
+ computedS = (maxRGB - minRGB)/maxRGB;
+ computedV = maxRGB;
+ return {h: computedH, s: computedS, v: computedV};
 }

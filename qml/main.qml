@@ -29,7 +29,9 @@ ApplicationWindow {
     property var functionColorMap: []
     property var gpioDirectionColorMap: []
     property var gpioValueColorMap: []
+    property string documentTitle: qsTr("BeagleBone Universal IO Configurator")
 
+    id: main
     visible: true
     width: 1000
     height: 800
@@ -170,7 +172,7 @@ ApplicationWindow {
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.leftMargin: selector.width * 0.02
-            anchors.topMargin: selector.width * 0.09
+            anchors.topMargin: selector.width * 0.02
             width: selector.width * 0.2
             height: selector.height * 0.14
             title: qsTr("Overlays")
@@ -180,12 +182,28 @@ ApplicationWindow {
             id: configModeSelector
             anchors.left: parent.left
             anchors.top: overlaySelector.bottom
-            anchors.leftMargin: selector.width * 0.02
-            anchors.topMargin: selector.width * 0.02
-            width: selector.width * 0.2
+            anchors.leftMargin: overlaySelector.anchors.leftMargin
+            anchors.topMargin: overlaySelector.anchors.topMargin
+            width: overlaySelector.width
             height: selector.height * 0.14
             title: qsTr("Config Mode")
             input: [qsTr("Pin function"), qsTr("GPIO direction"), qsTr("GPIO value")]
+        }
+
+        GroupBox {
+            id: settingsGroup
+            anchors.left: parent.left
+            anchors.top: configModeSelector.bottom
+            anchors.leftMargin: overlaySelector.anchors.leftMargin
+            anchors.topMargin: overlaySelector.anchors.topMargin
+            width: configModeSelector.width
+            title: qsTr("Display")
+
+            CheckBox {
+                id: displayUneditablePinsCheck
+                text: qsTr("Uneditable Pins")
+                checked: true
+            }
         }
 
         Legend {
@@ -256,14 +274,26 @@ ApplicationWindow {
                 source: "BBB_shape.svg"
                 fillMode: Image.PreserveAspectFit
 
-                Text {
+                TextInput {
                     id: titleText
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
                     anchors.topMargin: parent.height * 0.01
+                    width: parent.width
+                    horizontalAlignment: TextInput.AlignHCenter
                     font.pixelSize: parent.width * 0.03
                     font.bold: true
-                    text: qsTr("BeagleBone Universal IO Configurator")
+                    text: main.documentTitle
+                    selectByMouse: true
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.IBeamCursor
+                        enabled: false
+                    }
+
+                    Binding { target: titleText; property: "text"; value: main.documentTitle }
+                    Binding { target: main; property: "documentTitle"; value: titleText.text }
                 }
 
                 Port {
@@ -281,6 +311,8 @@ ApplicationWindow {
                     previewType: legend.previewType
                     previewEnabled: legend.previewEnabled
                     configMode: configModeSelector.currentIndex
+                    portNumber: 9
+                    displayUneditablePins: displayUneditablePinsCheck.checked
                 }
 
                 Text {
@@ -308,6 +340,8 @@ ApplicationWindow {
                     previewType: legend.previewType
                     previewEnabled: legend.previewEnabled
                     configMode: configModeSelector.currentIndex
+                    portNumber: 8
+                    displayUneditablePins: displayUneditablePinsCheck.checked
                 }
 
                 Text {

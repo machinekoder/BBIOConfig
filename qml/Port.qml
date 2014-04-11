@@ -26,6 +26,8 @@ Rectangle {
     property string previewType: ""
     property bool previewEnabled: false
     property int configMode: 0
+    property int portNumber: 0
+    property bool displayUneditablePins: true
 
     id: main
 
@@ -45,12 +47,12 @@ Rectangle {
             var numPins = 46
             for (var i = 1; i < (numPins+1); ++i)
             {
-                createPin(i)
+                createPin(i, numPins)
             }
         }
     }
 
-    function createPin(number) {
+    function createPin(number, numPins) {
         var component;
         var sprite;
         var numberVisible;
@@ -60,14 +62,17 @@ Rectangle {
          component = Qt.createComponent("Pin.qml");
          sprite = component.createObject(grid, {"width": Qt.binding(function(){return main.width*0.38}),
                                              "height": Qt.binding(function(){return main.width*0.38}),
-                                             "number": number,
+                                             "pinNumber": number,
+                                             "portNumber": Qt.binding(function(){return main.portNumber}),
                                              "numberVisible": numberVisible,
                                              "colorMap": Qt.binding(function(){return main.currentColorMap}),
                                              "functions": [],
                                              "loadedOverlays": Qt.binding(function(){return main.loadedOverlays}),
                                              "previewType": Qt.binding(function(){return main.previewType}),
                                              "previewEnabled": Qt.binding(function(){return main.previewEnabled}),
-                                             "configMode": Qt.binding(function(){return main.configMode})});
+                                             "configMode": Qt.binding(function(){return main.configMode}),
+                                             "displayUneditablePins": Qt.binding(function(){return main.displayUneditablePins}),
+                                             "z": numPins-number});
 
          if (sprite === null) {
              // Error Handling

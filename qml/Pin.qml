@@ -20,8 +20,9 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.1
 import QtQuick.Controls.Styles 1.1
+import "Functions.js" as Functions
 
-Rectangle {
+Item {
     property string defaultFunction: "GPIO"                                             // function when cape is not loded
     property var    functions: ["GPIO", "I2C", "UART"]                                  // pinmux functions
     property var    info: ["gpio1_0", "gpio1_0", "i2c1_cs", "uart0_sck"]                // info to default function and pinmux functions
@@ -36,7 +37,10 @@ Rectangle {
     property var    gpioDirections: ["unmodified", "in", "out"]
     property string gpioValue: "unmodified"                                             // startup gpio value
     property var    gpioValues: ["unmodifed", "low", "high"]
-    property int    number: 0                                                           // number of the pin
+    property int    pinNumber: 0                                                        // number of the pin
+    property int    portNumber: 0
+    property int    pruPinNumber: 0
+    property int    kernelPinNumber: 0
     property var    colorMap: [["GPIO", "red"], ["I2C", "blue"], ["UART", "green"]]     // current avtive color map
     property alias  numberVisible: numberText.visible                                   // visibility of the number
     property string description: "Test"                                                 // descriptive text for the pin
@@ -44,7 +48,11 @@ Rectangle {
     property var    textInput: leftTextInput.visible? leftTextInput: rightTextInput     // currently active text input
     property string infoText: getInfoText()                                             // info text for the pin
     property int    configMode: 0                                                       // active config mode: 0=function, 1=gpio dir, 2=gpio value
-    property double uneditableOpacitiy: (configMode == 0)?1.0:0.2
+    property double uneditableOpacitiy: (configMode == 0)?(displayUneditablePins?1.0:0.1):0.2
+    property bool   rightSide: ((main.pinNumber % 2) == 0)
+
+    property bool displayUneditablePins: true
+
 
     signal previewEntered(string type)
     signal previewExited()
@@ -52,14 +60,12 @@ Rectangle {
     id: main
     width: 100
     height: 62
-    color: getColor()
-    opacity: (editable || previewActive || (previewEnabled && previewType == ""))?1.0:uneditableOpacitiy
 
     function getEditable() {
         switch (configMode) {
         case 0: return pinmuxActive
-        case 1: return (type === "gpio")
-        case 2: return ((type === "gpio") && (gpioDirection === "out"))
+        case 1: return ((type === "gpio") || (type === "gpio_pu") || (type === "gpio_pd"))
+        case 2: return (((type === "gpio") || (type === "gpio_pu") || (type === "gpio_pd")) && (gpioDirection === "out"))
         default: return false
         }
     }
@@ -123,13 +129,44 @@ Rectangle {
         return false;
     }
 
+    ToolTip {
+        anchors.left: rightSide?parent.right:undefined
+        anchors.leftMargin: parent.width*0.8
+        anchors.right: !rightSide?parent.left:undefined
+        anchors.rightMargin: anchors.leftMargin
+        width: childrenRect.width + main.width
+        height: childrenRect.height + main.width
+        color: "white"
+        border.color: "black"
+
+        visible: (comboBox.hovered || mouseArea.containsMouse) && !(previewEnabled && (previewType == ""))
+        z: 1000
+
+        Text {
+            x: main.width/2
+            y: main.width/2
+            font.pixelSize: rightInfoText.font.pixelSize
+            text: "<b>P" + portNumber + "_" + pinNumber + "</b><br>" +
+                  infoText + " (" + (pinmuxActive?type:defaultFunction) + ")" +
+                  ((kernelPinNumber != 0)?"<br>" + qsTr("Kernel Pin: ") + kernelPinNumber:"") +
+                  ((pruPinNumber != 0)?"<br>" + qsTr("PRU Pin; ") + pruPinNumber:"")
+        }
+    }
+
+    Rectangle {
+        id: pinRect
+        anchors.fill: parent
+        color: getColor()
+        opacity: (editable || previewActive || (previewEnabled && previewType == ""))?1.0:uneditableOpacitiy
+    }
+
     Text {
         id: numberText
         anchors.fill: parent
-        color: "white"
+        color: ((pinRect.opacity > 0.5) && (pinRect.color.r+pinRect.color.g+pinRect.color.b) < 2.0)?"white":"black"
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-        text: main.number
+        text: main.pinNumber
         font.bold: true
         font.pixelSize: parent.width*0.6
     }
@@ -226,11 +263,12 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.right
         anchors.leftMargin: parent.width * 0.8
-        width: parent.width*6
+        width: parent.width*8
         horizontalAlignment: TextInput.AlignLeft
         font.pixelSize: parent.width*0.9
-        visible: !previewActive && ((main.number % 2) == 0)
+        visible: !previewActive && main.rightSide
         readOnly: !main.editable
+        selectByMouse: true
 
         MouseArea {
             anchors.fill: parent
@@ -261,7 +299,7 @@ Rectangle {
         width: rightTextInput.width
         horizontalAlignment: rightTextInput.horizontalAlignment
         font: rightTextInput.font
-        visible: previewActive && ((main.number % 2) == 0)
+        visible: previewActive && main.rightSide
         text: main.infoText
     }
 
@@ -269,12 +307,13 @@ Rectangle {
         id: leftTextInput
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.left
-        anchors.rightMargin: parent.width * 0.8
-        width: parent.width*6
+        anchors.rightMargin: rightTextInput.anchors.leftMargin
+        width: rightTextInput.width
         horizontalAlignment: TextInput.AlignRight
-        font.pixelSize: parent.width*0.9
-        visible: !previewActive && ((main.number % 2) == 1)
+        font.pixelSize: rightTextInput.font.pixelSize
+        visible: !previewActive && !main.rightSide
         readOnly: !main.editable
+        selectByMouse: true
 
         MouseArea {
             anchors.fill: parent
@@ -305,15 +344,16 @@ Rectangle {
         width: leftTextInput.width
         horizontalAlignment: leftTextInput.horizontalAlignment
         font: leftTextInput.font
-        visible: previewActive && ((main.number % 2) == 1)
+        visible: previewActive && !main.rightSide
         text: main.infoText
     }
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
         cursorShape: main.editable? Qt.PointingHandCursor: Qt.ArrowCursor
-        enabled: previewEnabled && (previewType == "")
-        hoverEnabled: true
+        enabled: (previewEnabled && (previewType == "")) || !editable
+        hoverEnabled: enabled
         onHoveredChanged: {
             if (containsMouse)
             {
