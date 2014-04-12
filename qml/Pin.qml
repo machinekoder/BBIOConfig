@@ -45,7 +45,7 @@ Item {
     property alias  numberVisible: numberText.visible                                   // visibility of the number
     property string description: "Test"                                                 // descriptive text for the pin
     property bool   editable: getEditable()                                             // editability of the pin
-    property var    textInput: leftTextInput.visible? leftTextInput: rightTextInput     // currently active text input
+    property alias  textInput: descriptionTextInput                                     // currently active text input
     property string infoText: getInfoText()                                             // info text for the pin
     property int    configMode: 0                                                       // active config mode: 0=function, 1=gpio dir, 2=gpio value
     property double uneditableOpacitiy: (configMode == 0)?(displayUneditablePins?1.0:0.1):0.2
@@ -145,11 +145,11 @@ Item {
         Text {
             x: main.width/2
             y: main.width/2
-            font.pixelSize: rightInfoText.font.pixelSize
+            font.pixelSize: 0
             text: "<b>P" + portNumber + "_" + pinNumber + "</b><br>" +
                   infoText + " (" + (pinmuxActive?type:defaultFunction) + ")" +
                   ((kernelPinNumber != 0)?"<br>" + qsTr("Kernel Pin: ") + kernelPinNumber:"") +
-                  ((pruPinNumber != 0)?"<br>" + qsTr("PRU Pin; ") + pruPinNumber:"")
+                  ((pruPinNumber != 0)?"<br>" + qsTr("PRU Pin: ") + pruPinNumber:"")
         }
     }
 
@@ -259,14 +259,16 @@ Item {
     }
 
     TextInput {
-        id: rightTextInput
+        id: descriptionTextInput
         anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.right
-        anchors.leftMargin: parent.width * 0.8
+        anchors.left: rightSide ? parent.right : undefined
+        anchors.leftMargin:  parent.width * 0.8
+        anchors.right: rightSide ? undefined : parent.left
+        anchors.rightMargin: anchors.leftMargin
         width: parent.width*8
-        horizontalAlignment: TextInput.AlignLeft
+        horizontalAlignment: rightSide ? TextInput.AlignLeft : TextInput.AlignRight
         font.pixelSize: parent.width*0.9
-        visible: !previewActive && main.rightSide
+        visible: !previewActive
         readOnly: !main.editable
         selectByMouse: true
 
@@ -276,8 +278,8 @@ Item {
             enabled: false
         }
 
-        Binding { target: main; property: "description"; value: rightTextInput.text }
-        Binding { target: rightTextInput; property: "text"; value: main.description }
+        Binding { target: main; property: "description"; value: descriptionTextInput.text }
+        Binding { target: descriptionTextInput; property: "text"; value: main.description }
 
         Keys.onPressed: {
             if ((event.key === Qt.Key_Menu) || (event.key === Qt.Key_Return)) {
@@ -293,58 +295,14 @@ Item {
     }
 
     Text {
-        id: rightInfoText
-        anchors.verticalCenter: rightTextInput.verticalCenter
-        anchors.left: rightTextInput.left
-        width: rightTextInput.width
-        horizontalAlignment: rightTextInput.horizontalAlignment
-        font: rightTextInput.font
-        visible: previewActive && main.rightSide
-        text: main.infoText
-    }
-
-    TextInput {
-        id: leftTextInput
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.right: parent.left
-        anchors.rightMargin: rightTextInput.anchors.leftMargin
-        width: rightTextInput.width
-        horizontalAlignment: TextInput.AlignRight
-        font.pixelSize: rightTextInput.font.pixelSize
-        visible: !previewActive && !main.rightSide
-        readOnly: !main.editable
-        selectByMouse: true
-
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: main.editable? Qt.IBeamCursor: Qt.ArrowCursor
-            enabled: false
-        }
-
-        Binding { target: main; property: "description"; value: leftTextInput.text}
-        Binding { target: leftTextInput; property: "text"; value: main.description}
-
-        Keys.onPressed: {
-            if ((event.key === Qt.Key_Menu) || (event.key === Qt.Key_Return)) {
-                var target
-                switch (main.configMode) {
-                case 0: target = comboBox; break;
-                case 1: target = comboBox2; break;
-                case 2: target = comboBox3; break;
-                }
-                target.forceActiveFocus()
-            }
-        }
-    }
-
-    Text {
-        id: leftInfoText
-        anchors.verticalCenter: leftTextInput.verticalCenter
-        anchors.right: leftTextInput.right
-        width: leftTextInput.width
-        horizontalAlignment: leftTextInput.horizontalAlignment
-        font: leftTextInput.font
-        visible: previewActive && !main.rightSide
+        id: descriptionInfoText
+        anchors.verticalCenter: descriptionTextInput.verticalCenter
+        anchors.left: rightSide ? descriptionTextInput.left : undefined
+        anchors.right: rightSide ? undefined : descriptionTextInput.right
+        width: descriptionTextInput.width
+        horizontalAlignment: descriptionTextInput.horizontalAlignment
+        font: descriptionTextInput.font
+        visible: previewActive
         text: main.infoText
     }
 
