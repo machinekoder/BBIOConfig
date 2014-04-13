@@ -271,7 +271,7 @@ ApplicationWindow {
 
             Image {
                 anchors.fill: parent
-                source: "BBB_shape.svg"
+                source: "BBB_shape.png"
                 fillMode: Image.PreserveAspectFit
 
                 TextInput {

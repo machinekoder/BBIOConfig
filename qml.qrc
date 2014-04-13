@@ -3,7 +3,6 @@
         <file>qml/main.qml</file>
         <file>qml/Pin.qml</file>
         <file>qml/Port.qml</file>
-        <file>qml/BBB_shape.svg</file>
         <file>qml/Legend.qml</file>
         <file>qml/pinmux.txt</file>
         <file>qml/ToolTip.qml</file>
@@ -14,5 +13,6 @@
         <file>qml/colormap1.txt</file>
         <file>qml/colormap2.txt</file>
         <file>qml/Functions.js</file>
+        <file>qml/BBB_shape.png</file>
     </qresource>
 </RCC>
