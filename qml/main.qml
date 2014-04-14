@@ -125,7 +125,7 @@ ApplicationWindow {
                 text: qsTr("&Online Documentation")
                 iconName: "help-contents"
 
-                onTriggered: Qt.openUrlExternally("https://github.com/strahlex/BBIOConfig/wiki")
+                onTriggered: Qt.openUrlExternally("https://github.com/strahlex/BBIOConfig/wiki/User-Manual")
             }
 
             MenuSeparator {}
