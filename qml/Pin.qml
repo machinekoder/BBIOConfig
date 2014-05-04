@@ -53,13 +53,22 @@ Item {
 
     property bool displayUneditablePins: true
 
-
     signal previewEntered(string type)
     signal previewExited()
+    signal dataChangedUnfiltered()
+    signal dataChanged()
 
-    id: main
-    width: 100
-    height: 62
+    Component.onCompleted: {
+        onTypeChanged.connect(dataChangedUnfiltered)
+        onGpioDirectionChanged.connect(dataChangedUnfiltered)
+        onGpioValueChanged.connect(dataChangedUnfiltered)
+        textInput.onTextChanged.connect(dataChangedUnfiltered)
+    }
+
+    onDataChangedUnfiltered: {
+        if ((pinNumber != 0) && (portNumber != 0))  // this fixed the wrong behaviour when config mode is switched
+            dataChanged()
+    }
 
     function getEditable() {
         switch (configMode) {
@@ -128,6 +137,10 @@ Item {
 
         return false;
     }
+
+    id: main
+    width: 100
+    height: 62
 
     ToolTip {
         anchors.left: rightSide?parent.right:undefined

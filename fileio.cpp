@@ -22,8 +22,8 @@
 FileIO::FileIO(QQuickItem *parent) :
     QQuickItem(parent)
 {
-    m_url = "";
-    m_data = "";
+    m_url = QStringLiteral("");
+    m_data = QStringLiteral("");
     m_error = false;
 }
 
@@ -69,7 +69,7 @@ void FileIO::load()
 
     if (file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        m_data = QString(file.readAll());
+        m_data = QString::fromLocal8Bit(file.readAll());
         emit dataChanged(m_data);
         file.close();
         m_error = false;

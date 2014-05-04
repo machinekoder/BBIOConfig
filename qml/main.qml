@@ -20,34 +20,16 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.1
 import QtQuick.Dialogs 1.1
-import FileIO 1.0
-import "Functions.js" as Functions
 
 ApplicationWindow {
-    property var portList: [port8, port9]
-    property string currentFile: ""
-    property var functionColorMap: []
-    property var gpioDirectionColorMap: []
-    property var gpioValueColorMap: []
-    property string documentTitle: qsTr("BeagleBone Universal IO Configurator")
+    property string name: qsTr("BB Universal IO Configurator (BBIOConfig)")
 
-    id: main
+    id: applicationWindow
+
+    title: (bbioConfig.currentFileName + (bbioConfig.modified? qsTr(" [modified] ") : "") + " - ") + applicationWindow.name
     visible: true
     width: 1000
     height: 800
-    title: qsTr("BB Universal IO Configurator (BBIOConfig)")
-
-    Component.onCompleted: {
-        functionColorMap = Functions.loadColorMap(":/qml/colormap.txt")
-        gpioDirectionColorMap = Functions.loadColorMap(":/qml/colormap1.txt")
-        gpioValueColorMap = Functions.loadColorMap(":/qml/colormap2.txt")
-        Functions.loadPinmux()
-
-        for (var i = 0; i < portList.length; ++i)
-        {
-            portList[i].createTabOrder()
-        }
-    }
 
     menuBar: MenuBar {
         Menu {
@@ -56,10 +38,7 @@ ApplicationWindow {
                 text: qsTr("&New")
                 iconName: "document-new"
 
-                onTriggered: {
-                    currentFile = ""
-                    Functions.loadPinmux()
-                }
+                onTriggered: aboutToCreateNewDocument()
 
                 action: Action {
                     shortcut: "Ctrl+N"
@@ -85,7 +64,7 @@ ApplicationWindow {
                 text: qsTr("&Save")
                 iconName: "document-save"
 
-                onTriggered: currentFile == "" ? fileSaveDialog.visible = true : Functions.saveConfig(currentFile)
+                onTriggered: bbioConfig.currentFile == "" ? fileSaveDialog.visible = true : bbioConfig.saveDocument("")
 
                 action: Action {
                     shortcut: "Ctrl+S"
@@ -111,7 +90,7 @@ ApplicationWindow {
                 text: qsTr("E&xit")
                 iconName: "application-exit"
 
-                onTriggered: Qt.quit()
+                onTriggered: aboutToClose()
 
                 action: Action {
                     shortcut: "Ctrl+Q"
@@ -139,6 +118,33 @@ ApplicationWindow {
         }
     }
 
+    function aboutToClose() {
+        if (bbioConfig.modified)
+        {
+            quitSaveDialog.quit = true
+            quitSaveDialog.visible = true
+        }
+        else {
+            Qt.quit()
+        }
+    }
+
+    function aboutToCreateNewDocument() {
+        if (bbioConfig.modified)
+        {
+            quitSaveDialog.quit = false
+            quitSaveDialog.visible = true
+        }
+        else {
+            bbioConfig.newDocument()
+        }
+    }
+
+    onClosing: {
+        close.accepted = false
+        aboutToClose() === false
+    }
+
     MessageDialog {
         id: aboutDialog
         title: qsTr("About BBIOConfig")
@@ -159,201 +165,66 @@ ApplicationWindow {
                    "along with BBIOConfig.  If not, see <http://www.gnu.org/licenses/>.<br>")
     }
 
-    File {
-        id: configFile
+    FileDialog {
+        id: fileOpenDialog
+        title: qsTr("Please choose a io file")
+        selectExisting: true
+        nameFilters: [ "BB Universion IO file (*.bbio)", "All files (*)" ]
+        onAccepted: {
+            bbioConfig.openDocument(fileUrl)
+        }
+        onRejected: {
+            console.log("Canceled")
+        }
     }
 
-    Rectangle {
-        color: "white"
+    FileDialog {
+        id: fileSaveDialog
+        title: qsTr("Please choose a io file")
+        selectExisting: false
+        nameFilters: [  qsTr("BB Universion IO file (*.bbio)"), qsTr("All files (*)") ]
+        onAccepted: {
+            bbioConfig.saveDocument(fileUrl)
+        }
+        onRejected: {
+            console.log("Canceled")
+        }
+    }
+
+    MessageDialog {
+        property bool quit: false
+
+        id: quitSaveDialog
+        title: qsTr("Save Documents") + " - " + applicationWindow.name
+        text: qsTr("The document has been modified. Do you want to save them before closing?")
+        standardButtons: StandardButton.Discard | StandardButton.Save | StandardButton.Cancel
+        onAccepted: {
+            if (bbioConfig.currentFile == "")
+            {
+                fileSaveDialog.visible = true
+            }
+            if (bbioConfig.currentFile != "")
+            {
+                bbioConfig.saveDocument("")
+                if (quit)
+                    Qt.quit()
+                else
+                    bbioConfig.newDocument()
+            }
+        }
+        onRejected: {
+            // Don't close
+        }
+        onDiscard: {
+            if (quit)
+                Qt.quit()
+            else
+                bbioConfig.newDocument()
+        }
+    }
+
+    BBIOConfig {
+        id: bbioConfig
         anchors.fill: parent
-
-        OverlaySelector {
-            id: overlaySelector
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.leftMargin: selector.width * 0.02
-            anchors.topMargin: selector.width * 0.02
-            width: selector.width * 0.2
-            height: selector.height * 0.14
-            title: qsTr("Overlays")
-        }
-
-        ConfigModeSelector {
-            id: configModeSelector
-            anchors.left: parent.left
-            anchors.top: overlaySelector.bottom
-            anchors.leftMargin: overlaySelector.anchors.leftMargin
-            anchors.topMargin: overlaySelector.anchors.topMargin
-            width: overlaySelector.width
-            height: selector.height * 0.14
-            title: qsTr("Config Mode")
-            input: [qsTr("Pin function"), qsTr("GPIO direction"), qsTr("GPIO value")]
-        }
-
-        GroupBox {
-            id: settingsGroup
-            anchors.left: parent.left
-            anchors.top: configModeSelector.bottom
-            anchors.leftMargin: overlaySelector.anchors.leftMargin
-            anchors.topMargin: overlaySelector.anchors.topMargin
-            width: configModeSelector.width
-            title: qsTr("Display")
-
-            CheckBox {
-                id: displayUneditablePinsCheck
-                text: qsTr("Uneditable Pins")
-                checked: true
-            }
-        }
-
-        Legend {
-            id: legend
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            anchors.rightMargin: selector.width * 0.02
-            anchors.bottomMargin: selector.height * 0.05
-            width: selector.width * 0.16
-            colorMap: selector.currentColorMap
-        }
-
-        Text {
-            id: fileNameText
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            text: currentFile
-        }
-
-        FileDialog {
-            id: fileOpenDialog
-            title: qsTr("Please choose a io file")
-            selectExisting: true
-            nameFilters: [ "BB Universion IO file (*.bbio)", "All files (*)" ]
-            onAccepted: {
-                currentFile = fileUrl
-                Functions.loadPinmux()
-                Functions.loadConfig(fileUrl)
-            }
-            onRejected: {
-                console.log("Canceled")
-            }
-        }
-
-        FileDialog {
-            id: fileSaveDialog
-            title: qsTr("Please choose a io file")
-            selectExisting: false
-            nameFilters: [ "BB Universion IO file (*.bbio)", "All files (*)" ]
-            onAccepted: {
-                currentFile = fileUrl
-                Functions.saveConfig(fileUrl)
-            }
-            onRejected: {
-                console.log("Canceled")
-            }
-        }
-
-        Item {
-            property var currentColorMap: {
-                switch (configModeSelector.currentIndex) {
-                case 0: return functionColorMap
-                case 1: return gpioDirectionColorMap
-                case 2: return gpioValueColorMap
-                default: return functionColorMap
-                }
-            }
-
-            id: selector
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            anchors.margins: 10
-            width: height
-
-            Image {
-                anchors.fill: parent
-                source: "BBB_shape.png"
-                fillMode: Image.PreserveAspectFit
-
-                TextInput {
-                    id: titleText
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-                    anchors.topMargin: parent.height * 0.01
-                    width: parent.width
-                    horizontalAlignment: TextInput.AlignHCenter
-                    font.pixelSize: parent.width * 0.03
-                    font.bold: true
-                    text: main.documentTitle
-                    selectByMouse: true
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.IBeamCursor
-                        enabled: false
-                    }
-
-                    Binding { target: titleText; property: "text"; value: main.documentTitle }
-                    Binding { target: main; property: "documentTitle"; value: titleText.text }
-                }
-
-                Port {
-                    id: port9
-
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    anchors.left: parent.left
-                    width: parent.width * 0.054
-                    anchors.topMargin: parent.height * 0.265
-                    anchors.bottomMargin: parent.height * 0.18
-                    anchors.leftMargin: parent.width * 0.245
-                    currentColorMap: selector.currentColorMap
-                    loadedOverlays: overlaySelector.output
-                    previewType: legend.previewType
-                    previewEnabled: legend.previewEnabled
-                    configMode: configModeSelector.currentIndex
-                    portNumber: 9
-                    displayUneditablePins: displayUneditablePinsCheck.checked
-                }
-
-                Text {
-                    text: "P9"
-                    color: "grey"
-                    anchors.top: port9.bottom
-                    anchors.topMargin: parent.height*0.01
-                    anchors.horizontalCenter: port9.horizontalCenter
-                    anchors.horizontalCenterOffset: parent.width * 0.03
-                    font.pixelSize: parent.width * 0.04
-                }
-
-                Port {
-                    id: port8
-
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    anchors.right: parent.right
-                    width: parent.width * 0.054
-                    anchors.topMargin: parent.height * 0.265
-                    anchors.bottomMargin: parent.height * 0.18
-                    anchors.rightMargin: parent.width * 0.245
-                    currentColorMap: selector.currentColorMap
-                    loadedOverlays: overlaySelector.output
-                    previewType: legend.previewType
-                    previewEnabled: legend.previewEnabled
-                    configMode: configModeSelector.currentIndex
-                    portNumber: 8
-                    displayUneditablePins: displayUneditablePinsCheck.checked
-                }
-
-                Text {
-                    text: "P8"
-                    color: "grey"
-                    anchors.top: port8.bottom
-                    anchors.topMargin: parent.height*0.01
-                    anchors.horizontalCenter: port8.horizontalCenter
-                    anchors.horizontalCenterOffset: -parent.width * 0.03
-                    font.pixelSize: parent.width * 0.04
-                }
-            }
-        }
     }
 }

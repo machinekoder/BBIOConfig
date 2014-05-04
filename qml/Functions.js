@@ -22,7 +22,7 @@ function loadPinmux()
     var functions = []
     var capes = []
 
-    configFile.url = ":/qml/pinmux.txt"
+    configFile.url = ":/bbioconfig/qml/pinmux.txt"
     configFile.load()
 
     if (configFile.error == true)
@@ -42,7 +42,7 @@ function loadPinmux()
             pin.type = "reserved"
             pin.description = ""
             pin.overlay = ""
-            pin.gpioDirection = "unmodidied"
+            pin.gpioDirection = "unmodified"
             pin.gpioValue = "unmodified"
             pin.kernelPinNumber = 0
             pin.pruPinNumber = 0
@@ -120,6 +120,9 @@ function loadPinmux()
     }
     //console.log(functions)
     overlaySelector.input = capes
+
+    //now everthing should be loaded -> reset modified
+    modified = false
 }
 
 function loadColorMap(fileName) {
@@ -155,13 +158,13 @@ function loadConfig(fileName)
     if (configFile.error == true)
     {
         console.log("file error")
-        return
+        return false
     }
 
     var lines = configFile.data.split("\n");
 
     if (lines.length === 0)
-        return
+        return true
 
     var overlays = []
     overlaySelector.clearSelection()    // clear selected overlays
@@ -291,6 +294,7 @@ function loadConfig(fileName)
                     targetPin.type = "gpio_pd"
                     targetPin.gpioDirection = "out"
                     targetPin.gpioValue = "low"
+                    break;
                 default:
                     targetPin.type = lineData[1]
                 }
@@ -309,6 +313,10 @@ function loadConfig(fileName)
     for (var i = 0; i < overlays.length; ++i) {
         overlaySelector.selectOverlay(overlays[i])
     }
+
+    modified = false
+
+    return true
 }
 
 function saveConfig(fileName) {
@@ -406,7 +414,12 @@ function saveConfig(fileName) {
     if (configFile.error)
     {
         console.log("file error")
+        return false
     }
+
+    modified = false
+
+    return true
 }
 
 function rgb2hsv (color) {
