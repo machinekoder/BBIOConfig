@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/">
+    <qresource prefix="/bbioconfig">
         <file>qml/main.qml</file>
         <file>qml/Pin.qml</file>
         <file>qml/Port.qml</file>
@@ -14,5 +14,6 @@
         <file>qml/colormap2.txt</file>
         <file>qml/Functions.js</file>
         <file>qml/BBB_shape.png</file>
+        <file>qml/BBIOConfig.qml</file>
     </qresource>
 </RCC>

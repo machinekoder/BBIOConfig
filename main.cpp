@@ -28,9 +28,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<FileIO>("FileIO", 1, 0, "File");
 
     QQmlApplicationEngine engine;
-    //engine.addImportPath(".");
-    //engine.addPluginPath(".");
-    engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
+    engine.load(QUrl(QStringLiteral("qrc:///bbioconfig/qml/main.qml")));
 
     return app.exec();
 }

@@ -20,6 +20,9 @@
 import QtQuick 2.0
 
 Rectangle {
+    property int pinCount: 46
+    property int pinRows: 2
+    property int pinNumberingInterval: 5
     property var pinList: []
     property var currentColorMap: [[["GPIO", "red"], ["I2C", "blue"], ["UART", "green"]]]
     property var loadedOverlays: []
@@ -28,36 +31,19 @@ Rectangle {
     property int configMode: 0
     property int portNumber: 0
     property bool displayUneditablePins: true
+    property bool ready: false
 
-    id: main
-
-    width: 50
-    height: 500
-    color: "white"
-    border.color: "black"
-    border.width: 2
-
-    Grid {
-        id: grid
-        spacing: 2
-        columns: 2
-        anchors.centerIn: parent
-
-        Component.onCompleted: {
-            var numPins = 46
-            for (var i = 1; i < (numPins+1); ++i)
-            {
-                createPin(i, numPins)
-            }
-        }
-    }
+    signal dataChanged()
 
     function createPin(number, numPins) {
         var component;
         var sprite;
         var numberVisible;
 
-        numberVisible =  ((number % 10 == 0) || (number % 10 == 9) || (number == 1) || (number == 2))
+        numberVisible =  ((number % (main.pinNumberingInterval*main.pinRows) == 0)
+                          || (number % (main.pinNumberingInterval*main.pinRows) == ((main.pinNumberingInterval-1)*main.pinRows+1))
+                          || (number === 1)
+                          || (number === main.pinRows))
 
          component = Qt.createComponent("Pin.qml");
          sprite = component.createObject(grid, {"width": Qt.binding(function(){return main.width*0.38}),
@@ -79,11 +65,13 @@ Rectangle {
              console.log("Error creating object");
          }
 
+         sprite.onDataChanged.connect(main.dataChanged)
+
          main.pinList.push(sprite)
      }
 
     function createTabOrder() {
-        var numPins = 46
+        var numPins = main.pinCount
         // set tab order
         for (var i = 0; i < (numPins-1); ++i)
         {
@@ -111,5 +99,29 @@ Rectangle {
         }
     }
 
+    id: main
+
+    width: 50
+    height: 500
+    color: "white"
+    border.color: "black"
+    border.width: 2
+
+    Component.onCompleted: {
+        var numPins = main.pinCount
+        for (var i = 1; i < (numPins+1); ++i)
+        {
+            createPin(i, numPins)
+        }
+
+        main.ready = true
+    }
+
+    Grid {
+        id: grid
+        spacing: 2
+        columns: main.pinRows
+        anchors.centerIn: parent
+    }
 }
 

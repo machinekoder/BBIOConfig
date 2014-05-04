@@ -66,7 +66,7 @@ GroupBox {
             createPin(i)
         }
 
-        main.height = colorMap.length * (main.pinSize + main.pinSpacing) + 30
+        //main.height = colorMap.length * (main.pinSize + main.pinSpacing) + 30
     }
 
     function createPin(number) {
