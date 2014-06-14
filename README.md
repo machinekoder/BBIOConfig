@@ -1,5 +1,5 @@
 =======
-BBPinConfig
+BBIOConfig
 ===========
 
 A GUI for the BB universal IO
