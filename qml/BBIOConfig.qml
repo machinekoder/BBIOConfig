@@ -57,6 +57,7 @@ Rectangle {
     id: main
     width: 1000
     height: 800
+    color: "white"
 
     Component.onCompleted: {
         loadTimer.running = true
@@ -103,168 +104,160 @@ Rectangle {
         id: configFile
     }
 
-    Rectangle {
-        color: "white"
-        anchors.fill: parent
+    OverlaySelector {
+        id: overlaySelector
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.margins: Screen.logicalPixelDensity * 2
+        width: Screen.logicalPixelDensity * 40
+        height: Screen.logicalPixelDensity * 30
+        title: qsTr("Overlays")
 
-        OverlaySelector {
-            id: overlaySelector
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.leftMargin: selector.width * 0.02
-            anchors.topMargin: selector.width * 0.02
-            width: selector.width * 0.2
-            height: selector.height * 0.14
-            title: qsTr("Overlays")
+        onOutputChanged: main.dataChanged()
+    }
 
-            onOutputChanged: main.dataChanged()
+    ConfigModeSelector {
+        id: configModeSelector
+        anchors.left: parent.left
+        anchors.top: overlaySelector.bottom
+        anchors.margins: overlaySelector.anchors.margins
+        width: overlaySelector.width
+        height: Screen.logicalPixelDensity * 30
+        title: qsTr("Config Mode")
+        input: [qsTr("Pin function"), qsTr("GPIO direction"), qsTr("GPIO value")]
+    }
+
+    GroupBox {
+        id: settingsGroup
+        anchors.left: parent.left
+        anchors.top: configModeSelector.bottom
+        anchors.margins: overlaySelector.anchors.margins
+        width: configModeSelector.width
+        title: qsTr("Display")
+
+        CheckBox {
+            id: displayUneditablePinsCheck
+            text: qsTr("Uneditable Pins")
+            checked: true
         }
+    }
 
-        ConfigModeSelector {
-            id: configModeSelector
-            anchors.left: parent.left
-            anchors.top: overlaySelector.bottom
-            anchors.leftMargin: overlaySelector.anchors.leftMargin
-            anchors.topMargin: overlaySelector.anchors.topMargin
-            width: overlaySelector.width
-            height: selector.height * 0.14
-            title: qsTr("Config Mode")
-            input: [qsTr("Pin function"), qsTr("GPIO direction"), qsTr("GPIO value")]
-        }
+    Legend {
+        id: legend
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: Screen.logicalPixelDensity * 2
+        width: Screen.pixelDensity * 25
+        colorMap: selector.currentColorMap
+    }
 
-        GroupBox {
-            id: settingsGroup
-            anchors.left: parent.left
-            anchors.top: configModeSelector.bottom
-            anchors.leftMargin: overlaySelector.anchors.leftMargin
-            anchors.topMargin: overlaySelector.anchors.topMargin
-            width: configModeSelector.width
-            title: qsTr("Display")
-
-            CheckBox {
-                id: displayUneditablePinsCheck
-                text: qsTr("Uneditable Pins")
-                checked: true
+    Item {
+        property var currentColorMap: {
+            switch (configModeSelector.currentIndex) {
+            case 0: return functionColorMap
+            case 1: return gpioDirectionColorMap
+            case 2: return gpioValueColorMap
+            default: return functionColorMap
             }
         }
 
-        Legend {
-            id: legend
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            anchors.margins: selector.width * 0.02
-            width: selector.width * 0.16
-            colorMap: selector.currentColorMap
+        id: selector
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.margins: parent.height * 0.05
+        width: height
+
+        Image {
+            anchors.fill: parent
+            source: "BBB_shape.png"
+            fillMode: Image.PreserveAspectFit
         }
 
-        Item {
-            property var currentColorMap: {
-                switch (configModeSelector.currentIndex) {
-                case 0: return functionColorMap
-                case 1: return gpioDirectionColorMap
-                case 2: return gpioValueColorMap
-                default: return functionColorMap
-                }
-            }
-
-            id: selector
+        TextInput {
+            id: titleText
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            anchors.margins: parent.height * 0.05
-            width: height
+            anchors.topMargin: parent.height * 0.01
+            width: parent.width
+            horizontalAlignment: TextInput.AlignHCenter
+            font.pixelSize: parent.width * 0.03
+            font.bold: true
+            text: main.documentTitle
+            selectByMouse: true
 
-            Image {
+            MouseArea {
                 anchors.fill: parent
-                source: "BBB_shape.png"
-                fillMode: Image.PreserveAspectFit
-
-                TextInput {
-                    id: titleText
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-                    anchors.topMargin: parent.height * 0.01
-                    width: parent.width
-                    horizontalAlignment: TextInput.AlignHCenter
-                    font.pixelSize: parent.width * 0.03
-                    font.bold: true
-                    text: main.documentTitle
-                    selectByMouse: true
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.IBeamCursor
-                        enabled: false
-                    }
-
-                    Binding { target: titleText; property: "text"; value: main.documentTitle }
-                    Binding { target: main; property: "documentTitle"; value: titleText.text }
-
-                    onTextChanged: main.dataChanged()
-                }
-
-                Port {
-                    id: port9
-
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    anchors.left: parent.left
-                    width: parent.width * 0.054
-                    anchors.topMargin: parent.height * 0.265
-                    anchors.bottomMargin: parent.height * 0.18
-                    anchors.leftMargin: parent.width * 0.245
-                    currentColorMap: selector.currentColorMap
-                    loadedOverlays: overlaySelector.output
-                    previewType: legend.previewType
-                    previewEnabled: legend.previewEnabled
-                    configMode: configModeSelector.currentIndex
-                    portNumber: 9
-                    displayUneditablePins: displayUneditablePinsCheck.checked
-
-                    onDataChanged: main.dataChanged()
-                }
-
-                Text {
-                    text: "P9"
-                    color: "grey"
-                    anchors.top: port9.bottom
-                    anchors.topMargin: parent.height*0.01
-                    anchors.horizontalCenter: port9.horizontalCenter
-                    anchors.horizontalCenterOffset: parent.width * 0.03
-                    font.pixelSize: parent.width * 0.04
-                }
-
-                Port {
-                    id: port8
-
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    anchors.right: parent.right
-                    width: parent.width * 0.054
-                    anchors.topMargin: parent.height * 0.265
-                    anchors.bottomMargin: parent.height * 0.18
-                    anchors.rightMargin: parent.width * 0.245
-                    currentColorMap: selector.currentColorMap
-                    loadedOverlays: overlaySelector.output
-                    previewType: legend.previewType
-                    previewEnabled: legend.previewEnabled
-                    configMode: configModeSelector.currentIndex
-                    portNumber: 8
-                    displayUneditablePins: displayUneditablePinsCheck.checked
-
-                    onDataChanged: main.dataChanged()
-                }
-
-                Text {
-                    text: "P8"
-                    color: "grey"
-                    anchors.top: port8.bottom
-                    anchors.topMargin: parent.height*0.01
-                    anchors.horizontalCenter: port8.horizontalCenter
-                    anchors.horizontalCenterOffset: -parent.width * 0.03
-                    font.pixelSize: parent.width * 0.04
-                }
+                cursorShape: Qt.IBeamCursor
+                enabled: false
             }
+
+            Binding { target: titleText; property: "text"; value: main.documentTitle }
+            Binding { target: main; property: "documentTitle"; value: titleText.text }
+
+            onTextChanged: main.dataChanged()
+        }
+
+        Port {
+            id: port9
+
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            width: parent.width * 0.054
+            anchors.topMargin: parent.height * 0.265
+            anchors.bottomMargin: parent.height * 0.18
+            anchors.leftMargin: parent.width * 0.245
+            currentColorMap: selector.currentColorMap
+            loadedOverlays: overlaySelector.output
+            previewType: legend.previewType
+            previewEnabled: legend.previewEnabled
+            configMode: configModeSelector.currentIndex
+            portNumber: 9
+            displayUneditablePins: displayUneditablePinsCheck.checked
+
+            onDataChanged: main.dataChanged()
+        }
+
+        Text {
+            text: "P9"
+            color: "grey"
+            anchors.top: port9.bottom
+            anchors.topMargin: parent.height*0.01
+            anchors.horizontalCenter: port9.horizontalCenter
+            anchors.horizontalCenterOffset: parent.width * 0.03
+            font.pixelSize: parent.width * 0.04
+        }
+
+        Port {
+            id: port8
+
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            width: parent.width * 0.054
+            anchors.topMargin: parent.height * 0.265
+            anchors.bottomMargin: parent.height * 0.18
+            anchors.rightMargin: parent.width * 0.245
+            currentColorMap: selector.currentColorMap
+            loadedOverlays: overlaySelector.output
+            previewType: legend.previewType
+            previewEnabled: legend.previewEnabled
+            configMode: configModeSelector.currentIndex
+            portNumber: 8
+            displayUneditablePins: displayUneditablePinsCheck.checked
+
+            onDataChanged: main.dataChanged()
+        }
+
+        Text {
+            text: "P8"
+            color: "grey"
+            anchors.top: port8.bottom
+            anchors.topMargin: parent.height*0.01
+            anchors.horizontalCenter: port8.horizontalCenter
+            anchors.horizontalCenterOffset: -parent.width * 0.03
+            font.pixelSize: parent.width * 0.04
         }
     }
 }
