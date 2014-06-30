@@ -46,8 +46,8 @@ Rectangle {
                           || (number === main.pinRows))
 
          component = Qt.createComponent("Pin.qml");
-         sprite = component.createObject(grid, {"width": Qt.binding(function(){return main.width*0.38}),
-                                             "height": Qt.binding(function(){return main.width*0.38}),
+         sprite = component.createObject(grid, {"width": Qt.binding(function(){return main.width*0.36}),
+                                             "height": Qt.binding(function(){return main.width*0.36}),
                                              "pinNumber": number,
                                              "portNumber": Qt.binding(function(){return main.portNumber}),
                                              "numberVisible": numberVisible,
@@ -105,7 +105,7 @@ Rectangle {
     height: 500
     color: "white"
     border.color: "black"
-    border.width: 2
+    border.width: main.width * 0.05
 
     Component.onCompleted: {
         var numPins = main.pinCount
@@ -119,7 +119,7 @@ Rectangle {
 
     Grid {
         id: grid
-        spacing: 2
+        spacing: main.width * 0.06
         columns: main.pinRows
         anchors.centerIn: parent
     }
