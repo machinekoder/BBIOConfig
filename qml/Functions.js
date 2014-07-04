@@ -340,7 +340,7 @@ function saveConfig(fileName) {
             var sourcePin = portList[i].pinList[j]
             var pin = j+1
 
-            if (sourcePin.overlay === "")    // this is a reserved pin
+            if ((sourcePin.overlay === "") || (sourcePin.type === "reserved"))    // this is a reserved pin
                 continue
             if (sourcePin.loadedOverlays.indexOf(sourcePin.overlay) === -1) // overlay not loaded
                 continue

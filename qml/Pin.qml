@@ -29,7 +29,7 @@ Item {
     property string type: "GPIO"                                                        // current selected type
     property string overlay: "cape-test"                                                // overlay that is necessary for pinmuxing
     property var    loadedOverlays: ["cape-test", "cape-test2"]                         // currently loaded overlay
-    property bool   pinmuxActive: (loadedOverlays.indexOf(overlay) !== -1)              // determines wheter the pinmux is active or not
+    property bool   pinmuxActive: getPinmuxActive()                                     // determines wheter the pinmux is active or not
     property string previewType: ""                                                     // type for preview mode
     property bool   previewEnabled: false                                               // enabled the preview mdoe
     property bool   previewActive:  getPreviewActive()                                  // holds whether the preview is active or not
@@ -68,6 +68,10 @@ Item {
     onDataChangedUnfiltered: {
         if ((pinNumber != 0) && (portNumber != 0))  // this fixed the wrong behaviour when config mode is switched
             dataChanged()
+    }
+
+    function getPinmuxActive() {
+        return (loadedOverlays.indexOf(overlay) !== -1) && ((functions.length > 0) && (functions[0] !== "reserved"))
     }
 
     function getEditable() {

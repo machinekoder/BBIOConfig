@@ -501,27 +501,27 @@ P9_34_CAPE=""
 
 P9_35_PIN="adc"
 P9_35_INFO="AIN6"
-P9_35_CAPE=""
+P9_35_CAPE="cape-bone-iio"
 
 P9_36_PIN="adc"
 P9_36_INFO="AIN5"
-P9_36_CAPE=""
+P9_36_CAPE="cape-bone-iio"
 
 P9_37_PIN="adc"
 P9_37_INFO="AIN2"
-P9_37_CAPE=""
+P9_37_CAPE="cape-bone-iio"
 
 P9_38_PIN="adc"
 P9_38_INFO="AIN3"
-P9_38_CAPE=""
+P9_38_CAPE="cape-bone-iio"
 
 P9_39_PIN="adc"
 P9_39_INFO="AIN0"
-P9_39_CAPE=""
+P9_39_CAPE="cape-bone-iio"
 
 P9_40_PIN="adc"
 P9_40_INFO="AIN1"
-P9_40_CAPE=""
+P9_40_CAPE="cape-bone-iio"
 
 P9_41_PRU="52"
 P9_41_GPIO="20"
