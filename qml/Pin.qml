@@ -69,7 +69,7 @@ Item {
         if ((pinNumber != 0) && (portNumber != 0))  // this fixed the wrong behaviour when config mode is switched
             dataChanged()
     }
-
+    
     function getPinmuxActive() {
         return (loadedOverlays.indexOf(overlay) !== -1) && ((functions.length > 0) && (functions[0] !== "reserved"))
     }
