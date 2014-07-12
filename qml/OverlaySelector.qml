@@ -23,6 +23,7 @@ import QtQuick.Controls 1.0
 GroupBox {
     property var input: ["test", "test2", "test3"]
     property var output: []
+    property string hoveredItem: ""
 
     id: main
     width: 300
@@ -42,6 +43,7 @@ GroupBox {
                 text: name
                 checked: itemChecked
                 onClicked: selectionChanged(index, checked)
+                onHoveredChanged: hovered ? main.hoveredItem = text : main.hoveredItem = ""
             }
     }
 

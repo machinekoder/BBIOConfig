@@ -27,6 +27,7 @@ Rectangle {
     property var currentColorMap: [[["GPIO", "red"], ["I2C", "blue"], ["UART", "green"]]]
     property var loadedOverlays: []
     property string previewType: ""
+    property string previewOverlay: ""
     property bool previewEnabled: false
     property int configMode: 0
     property int portNumber: 0
@@ -55,6 +56,7 @@ Rectangle {
                                              "functions": [],
                                              "loadedOverlays": Qt.binding(function(){return main.loadedOverlays}),
                                              "previewType": Qt.binding(function(){return main.previewType}),
+                                             "previewOverlay": Qt.binding(function(){return main.previewOverlay}),
                                              "previewEnabled": Qt.binding(function(){return main.previewEnabled}),
                                              "configMode": Qt.binding(function(){return main.configMode}),
                                              "displayUneditablePins": Qt.binding(function(){return main.displayUneditablePins}),
