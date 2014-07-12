@@ -31,6 +31,7 @@ Item {
     property var    loadedOverlays: ["cape-test", "cape-test2"]                         // currently loaded overlay
     property bool   pinmuxActive: getPinmuxActive()                                     // determines wheter the pinmux is active or not
     property string previewType: ""                                                     // type for preview mode
+    property string previewOverlay: ""                                                  // overlay for preview mode
     property bool   previewEnabled: false                                               // enabled the preview mdoe
     property bool   previewActive:  getPreviewActive()                                  // holds whether the preview is active or not
     property string gpioDirection: "unmodified"                                         // type of the gpio pin (in or out)
@@ -109,7 +110,12 @@ Item {
             searchValue = main.gpioValue
         }
         else if (main.previewActive) {
-            searchValue = main.previewType
+            if (main.previewType != "")
+                searchValue = main.previewType
+            else if (overlayPreviewTimer.x)     // previewing an overlay -> blinking
+                 return "white"
+            else
+                searchValue = main.defaultFunction
         }
         else if (main.pinmuxActive) {
             searchValue = main.type
@@ -130,6 +136,9 @@ Item {
 
     function getPreviewActive() {
 
+        if (previewEnabled && (previewType == "") && (previewOverlay == overlay))
+            return true
+
         if ((!previewEnabled) || (previewType == ""))
             return false
 
@@ -146,6 +155,19 @@ Item {
     width: 100
     height: 62
 
+<<<<<<< HEAD
+=======
+    Timer {
+        property color previewColor: "white"
+        property bool x: true
+        id: overlayPreviewTimer
+        interval: 400
+        running: previewActive && (previewOverlay != "")
+        repeat: true
+        onTriggered: x = !x
+    }
+
+>>>>>>> adf09281281a5175cf4009aa763ec3f41b1f5e19
     ToolTip {
         anchors.left: rightSide?parent.right:undefined
         anchors.leftMargin: parent.width*0.8
@@ -156,7 +178,7 @@ Item {
         color: "white"
         border.color: "black"
 
-        visible: (comboBox.hovered || mouseArea.containsMouse) && !(previewEnabled && (previewType == ""))
+        visible: (comboBox.hovered || comboBox2.hovered || comboBox3.hovered || mouseArea.containsMouse) && !(previewEnabled && (previewType == ""))
         z: 1000
 
         Text {

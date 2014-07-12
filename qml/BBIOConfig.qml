@@ -211,7 +211,8 @@ Rectangle {
             currentColorMap: selector.currentColorMap
             loadedOverlays: overlaySelector.output
             previewType: legend.previewType
-            previewEnabled: legend.previewEnabled
+            previewOverlay: overlaySelector.hoveredItem
+            previewEnabled: (legend.previewType != "") || (overlaySelector.hoveredItem != "")
             configMode: configModeSelector.currentIndex
             portNumber: 9
             displayUneditablePins: displayUneditablePinsCheck.checked
@@ -242,7 +243,12 @@ Rectangle {
             currentColorMap: selector.currentColorMap
             loadedOverlays: overlaySelector.output
             previewType: legend.previewType
+<<<<<<< HEAD
             previewEnabled: legend.previewEnabled
+=======
+            previewOverlay: overlaySelector.hoveredItem
+            previewEnabled: (legend.previewType != "") || (overlaySelector.hoveredItem != "")
+>>>>>>> adf09281281a5175cf4009aa763ec3f41b1f5e19
             configMode: configModeSelector.currentIndex
             portNumber: 8
             displayUneditablePins: displayUneditablePinsCheck.checked

@@ -24,7 +24,6 @@ GroupBox {
     property var colorMap: [["GPIO", "red"], ["I2C", "blue"], ["UART", "green"]]
     property var pinList: []
     property string previewType: ""
-    property bool previewEnabled: false
     property int pinSize: main.width*0.125
     property int pinSpacing: 2
 
@@ -101,10 +100,9 @@ GroupBox {
 
     function previewEntered(type) {
         main.previewType = type
-        main.previewEnabled = true
     }
 
     function previewExited() {
-        main.previewEnabled = false
+        main.previewType = ""
     }
 }
