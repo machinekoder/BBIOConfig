@@ -110,7 +110,7 @@ Rectangle {
         anchors.top: parent.top
         anchors.margins: Screen.logicalPixelDensity * 2
         width: Screen.logicalPixelDensity * 40
-        height: Screen.logicalPixelDensity * 30
+        height: Screen.logicalPixelDensity * 40
         title: qsTr("Overlays")
 
         onOutputChanged: main.dataChanged()
