@@ -104,7 +104,7 @@ function loadPinmux()
                     targetPin.info = functionsData
                     break;
                 case "CAPE":
-                    targetPin.overlay = functionsData[0]
+                    targetPin.overlay = functionsData
                     break;
                 case "PRU":
                     targetPin.pruPinNumber = parseInt(functionsData[0])

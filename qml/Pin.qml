@@ -27,7 +27,7 @@ Item {
     property var    functions: ["GPIO", "I2C", "UART"]                                  // pinmux functions
     property var    info: ["gpio1_0", "gpio1_0", "i2c1_cs", "uart0_sck"]                // info to default function and pinmux functions
     property string type: "GPIO"                                                        // current selected type
-    property string overlay: "cape-test"                                                // overlay that is necessary for pinmuxing
+    property var    overlay: ["cape-test"]                                              // overlay that is necessary for pinmuxing
     property var    loadedOverlays: ["cape-test", "cape-test2"]                         // currently loaded overlay
     property bool   pinmuxActive: getPinmuxActive()                                     // determines wheter the pinmux is active or not
     property string previewType: ""                                                     // type for preview mode
@@ -72,7 +72,19 @@ Item {
     }
     
     function getPinmuxActive() {
-        return (loadedOverlays.indexOf(overlay) !== -1) && ((functions.length > 0) && (functions[0] !== "reserved"))
+        var overlayActive = false
+        for (var i = 0; i < overlay.length; ++i) {
+            if (overlay[i] === "") {
+                continue
+            }
+
+            if (loadedOverlays.indexOf(overlay[i]) !== -1) {
+                overlayActive = true
+                break
+            }
+        }
+
+        return (overlayActive) && ((functions.length > 0) && (functions[0] !== "reserved"))
     }
 
     function getEditable() {
@@ -136,7 +148,7 @@ Item {
 
     function getPreviewActive() {
 
-        if (previewEnabled && (previewType == "") && (previewOverlay == overlay))
+        if (previewEnabled && (previewType == "") && (overlay.indexOf(previewOverlay) != -1))
             return true
 
         if ((!previewEnabled) || (previewType == ""))
