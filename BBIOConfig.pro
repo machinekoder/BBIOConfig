@@ -1,4 +1,5 @@
 TEMPLATE = app
+TARGET = bbioconfig
 
 QT += qml quick widgets
 QT -= network
