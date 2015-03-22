@@ -20,7 +20,7 @@
 import QtQuick 2.0
 
 Rectangle {
-    property int pinCount: 46
+    property int pinCount: 92
     property int pinRows: 2
     property int pinNumberingInterval: 5
     property var pinList: []
@@ -60,7 +60,8 @@ Rectangle {
                                              "previewEnabled": Qt.binding(function(){return main.previewEnabled}),
                                              "configMode": Qt.binding(function(){return main.configMode}),
                                              "displayUneditablePins": Qt.binding(function(){return main.displayUneditablePins}),
-                                             "z": numPins-number});
+                                             "z": numPins-number,
+                                             "visible": false});
 
          if (sprite === null) {
              // Error Handling

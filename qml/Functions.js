@@ -46,6 +46,7 @@ function loadPinmux()
             pin.gpioValue = "unmodified"
             pin.kernelPinNumber = 0
             pin.pruPinNumber = 0
+            pin.visible = false
         }
     }
 
@@ -92,6 +93,7 @@ function loadPinmux()
             if (pin <= portList[port-8].pinList.length) // BB has 46 pins per port
             {
                 var targetPin = portList[port-8].pinList[pin-1]
+                targetPin.visible = true
                 switch(type) {
                 case "PINMUX":
                     targetPin.functions = functionsData
