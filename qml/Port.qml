@@ -105,7 +105,7 @@ Rectangle {
     id: main
 
     width: 50
-    height: 500
+    height: grid.height + grid.spacing * 4
     color: "white"
     border.color: "black"
     border.width: main.width * 0.05
@@ -124,7 +124,9 @@ Rectangle {
         id: grid
         spacing: main.width * 0.06
         columns: main.pinRows
-        anchors.centerIn: parent
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.margins: spacing * 2
     }
 }
 

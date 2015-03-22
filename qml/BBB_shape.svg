@@ -13,8 +13,11 @@
    height="459.71875"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="BBB_shape.svg">
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="BBB_shape.svg"
+   inkscape:export-filename="/home/alexander/projects/BBIOConfig/qml/BBB_shape.png"
+   inkscape:export-xdpi="399.84"
+   inkscape:export-ydpi="399.84">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -25,7 +28,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.979899"
-     inkscape:cx="266.93117"
+     inkscape:cx="84.598633"
      inkscape:cy="199.69494"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -33,9 +36,9 @@
      inkscape:snap-bbox="true"
      inkscape:snap-bbox-midpoints="true"
      inkscape:window-width="1680"
-     inkscape:window-height="1036"
-     inkscape:window-x="1599"
-     inkscape:window-y="-4"
+     inkscape:window-height="1029"
+     inkscape:window-x="1918"
+     inkscape:window-y="-2"
      inkscape:window-maximized="1"
      inkscape:bbox-nodes="false"
      inkscape:snap-bbox-edge-midpoints="true"
@@ -67,7 +70,7 @@
        height="280.5972"
        width="25.912476"
        id="rect3872"
-       style="fill:none;stroke:#000000;stroke-width:0.97268891;stroke-opacity:1" />
+       style="fill:#000000;stroke:none;stroke-width:0.97268891;stroke-opacity:1;fill-opacity:0" />
     <path
        style="fill:none;stroke:#8a8a8a;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        d="M 147.16518,401.56696 147.19643,401.59821 C 129.45354,401.59821 115.07143,415.98032 115.07143,433.72321 L 115.00893,433.69196 115.00893,757.69196 115.57143,757.06696 C 115.57143,791.39452 143.40012,819.22321 177.72768,819.22321 L 177.66518,819.78571 252.50893,819.78571 252.50893,816.09821 304.29018,816.09821 304.29018,819.78571 316.35268,819.78571 315.85268,819.22321 C 350.18024,819.22321 378.00893,791.39452 378.00893,757.06696 L 378.57143,757.56696 378.57143,433.69196 378.50893,433.72321 C 378.50893,415.98032 364.12682,401.59821 346.38393,401.59821 L 346.41518,401.56696 147.16518,401.56696 z"
@@ -230,7 +233,7 @@
          y="732.2804"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:end;text-anchor:end;fill:#1e1e1e;fill-opacity:1;font-family:Liberation Sans;-inkscape-font-specification:Liberation Sans" /></text>
     <rect
-       style="fill:none;stroke:#000000;stroke-width:0.97268891;stroke-opacity:1"
+       style="fill:#000000;stroke:none;stroke-width:0.97268891;stroke-opacity:1;fill-opacity:0"
        id="rect4261"
        width="25.912476"
        height="280.5972"

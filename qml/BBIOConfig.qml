@@ -202,11 +202,9 @@ Rectangle {
             id: port9
 
             anchors.top: parent.top
-            anchors.bottom: parent.bottom
             anchors.left: parent.left
             width: parent.width * 0.054
-            anchors.topMargin: parent.height * 0.265
-            anchors.bottomMargin: parent.height * 0.18
+            anchors.topMargin: parent.height * 0.275
             anchors.leftMargin: parent.width * 0.245
             currentColorMap: selector.currentColorMap
             loadedOverlays: overlaySelector.output
@@ -234,11 +232,9 @@ Rectangle {
             id: port8
 
             anchors.top: parent.top
-            anchors.bottom: parent.bottom
             anchors.right: parent.right
             width: parent.width * 0.054
-            anchors.topMargin: parent.height * 0.265
-            anchors.bottomMargin: parent.height * 0.18
+            anchors.topMargin: parent.height * 0.275
             anchors.rightMargin: parent.width * 0.245
             currentColorMap: selector.currentColorMap
             loadedOverlays: overlaySelector.output
