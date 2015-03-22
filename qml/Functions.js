@@ -41,7 +41,7 @@ function loadPinmux()
             pin.info = ["reserved"]
             pin.type = "reserved"
             pin.description = ""
-            pin.overlay = ""
+            pin.overlay = []
             pin.gpioDirection = "unmodified"
             pin.gpioValue = "unmodified"
             pin.kernelPinNumber = 0
@@ -342,9 +342,17 @@ function saveConfig(fileName) {
             var sourcePin = portList[i].pinList[j]
             var pin = j+1
 
-            if ((sourcePin.overlay === "") || (sourcePin.type === "reserved"))    // this is a reserved pin
+            if ((sourcePin.overlay === []) || (sourcePin.type === "reserved"))    // this is a reserved pin
                 continue
-            if (sourcePin.loadedOverlays.indexOf(sourcePin.overlay) === -1) // overlay not loaded
+
+            var contained = false
+            for (var k = 0; k < sourcePin.overlay.length; ++k) {
+                if (sourcePin.loadedOverlays.indexOf(sourcePin.overlay[k]) !== -1) { // overlay not loaded
+                    contained = true
+                    break
+                }
+            }
+            if (!contained) // overlay not loaded
                 continue
 
             var pinName = "P" + port + "_" + pin
