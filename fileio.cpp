@@ -39,7 +39,7 @@ void FileIO::save()
 
     QFile file(fileName);
 
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+    if (file.open(QIODevice::WriteOnly))
     {
         file.write(m_data.toLocal8Bit());
         file.close();
@@ -67,7 +67,7 @@ void FileIO::load()
 
     QFile file(fileName);
 
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (file.open(QIODevice::ReadOnly))
     {
         m_data = QString::fromLocal8Bit(file.readAll());
         emit dataChanged(m_data);
