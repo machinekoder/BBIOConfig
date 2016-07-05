@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>CFBundleDisplayName</key>
+        <string>BBIOConfig</string>
+        <key>CFBundleExecutable</key>
+        <string>bbioconfig</string>
+        <key>CFBundleGetInfoString</key>
+        <string>Created by Qt/QMake</string>
+        <key>CFBundleIconFile</key>
+        <string>machinekit.icns</string>
+        <key>CFBundleIdentifier</key>
+        <string>systems.roessler.bbioconfig</string>
+        <key>NSHumanReadableCopyright</key>
+        <string>Alexander Rössler 2016</string>
+    </dict>
+</plist>
