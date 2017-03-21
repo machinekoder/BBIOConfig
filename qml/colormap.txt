@@ -10,13 +10,15 @@ gpio_pu     #448CFF
 gpio_pd     #4444FF
 pruout      #00C000
 pruin       #00AD00
+pru_ecap    #009900
+pru_uart    #009900
 pwm         #FF0000
 pwm2        #FF4444
 uart        #662222
 i2c         #00FFFF
 spi         #FF00FF
-spics       #AA00AA
-spiclk      #FF44FF
+spics       #FF00FF
+spiclk      #FF00FF
 can         #AAFFAA
 qep         orange
 timer       yellow
