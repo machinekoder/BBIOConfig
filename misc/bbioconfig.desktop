@@ -1,0 +1,22 @@
+[Desktop Entry]
+Categories=Qt;Utility; # TODO
+Comment[en_US]=A GUI for the BB universal IO
+Comment=A GUI for the BB universal IO
+Encoding=UTF-8
+Exec=bbioconfig
+GenericName[en_US]=BBIOConfig
+GenericName=BBIOConfig
+Icon=bbioconfig
+MimeType=
+Name[en_US]=BBIOConfig
+Name=BBIOConfig
+Path=
+StartupNotify=true
+Terminal=false
+TerminalOptions=
+Type=Application
+Version=1.0
+X-DBUS-ServiceName=
+X-DBUS-StartupType=
+X-KDE-SubstituteUID=false
+X-KDE-Username=
