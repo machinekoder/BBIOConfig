@@ -26,25 +26,24 @@ GroupBox {
     property string hoveredItem: ""
 
     id: main
-    width: 300
-    height: 200
 
     ListModel {
         id: listModel
 
     }
 
-    ListView {
-        id: listView
-        anchors.fill: parent
-        model: listModel
-        delegate:
-            CheckBox {
-                text: name
-                checked: itemChecked
-                onClicked: selectionChanged(index, checked)
-                onHoveredChanged: hovered ? main.hoveredItem = text : main.hoveredItem = ""
-            }
+    Column {
+        id: container
+        Repeater {
+            id: listView
+            model: listModel
+                CheckBox {
+                    text: name
+                    checked: itemChecked
+                    onClicked: selectionChanged(index, checked)
+                    onHoveredChanged: hovered ? main.hoveredItem = text : main.hoveredItem = ""
+                }
+        }
     }
 
     onInputChanged: {

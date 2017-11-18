@@ -26,25 +26,25 @@ GroupBox {
     property int currentIndex: 0
 
     id: main
-    width: 300
-    height: 200
 
     ListModel {
         id: listModel
 
     }
 
-    ListView {
-        id: listView
-        anchors.fill: parent
-        model: listModel
-        delegate:
+    Column {
+        Repeater {
+            id: listView
+            anchors.fill: parent
+            model: listModel
+
             RadioButton {
                 text: name
                 exclusiveGroup: group
                 checked: radioChecked
                 onClicked: selectionChanged(index, checked)
             }
+        }
     }
 
     ExclusiveGroup { id: group }

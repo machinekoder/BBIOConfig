@@ -88,7 +88,7 @@ Rectangle {
                 main.gpioDirectionColorMap = Functions.loadColorMap(":/bbioconfig/qml/colormap1.txt")
                 main.gpioValueColorMap = Functions.loadColorMap(":/bbioconfig/qml/colormap2.txt")
 
-                if (main.currentFile != "") // the file was already loaded
+                if (main.currentFile !== "") // the file was already loaded
                     openDocument(main.currentFile)
                 else
                     Functions.loadPinmux()
@@ -110,7 +110,6 @@ Rectangle {
         anchors.top: parent.top
         anchors.margins: Screen.logicalPixelDensity * 2
         width: Screen.logicalPixelDensity * 40
-        height: Screen.logicalPixelDensity * 40
         title: qsTr("Overlays")
 
         onOutputChanged: main.dataChanged()
@@ -122,7 +121,6 @@ Rectangle {
         anchors.top: overlaySelector.bottom
         anchors.margins: overlaySelector.anchors.margins
         width: overlaySelector.width
-        height: Screen.logicalPixelDensity * 30
         title: qsTr("Config Mode")
         input: [qsTr("Pin function"), qsTr("GPIO direction"), qsTr("GPIO value")]
     }

@@ -150,7 +150,7 @@ ApplicationWindow {
         title: qsTr("About BBIOConfig")
         text: qsTr("<h2>BeagleBone Universal IO Configurator<br>" +
                    "BBIOConfig</h2> <br>" +
-                   "Copyright (C) 2014 by Alexander Rössler (<a href='mailto:mail.aroessler@gmail.com'>mail.aroessler@gmail.com</a>)<br><br>" +
+                   "Copyright (C) 2014-2017 by Alexander Rössler (<a href='mailto:mail.aroessler@gmail.com'>mail.aroessler@gmail.com</a>)<br><br>" +
                    "BBIOConfig is free software: you can redistribute it and/or modify<br>" +
                    "it under the terms of the GNU General Public License as published by<br>" +
                    "the Free Software Foundation, either version 3 of the License, or<br>" +
