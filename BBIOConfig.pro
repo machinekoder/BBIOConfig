@@ -29,12 +29,14 @@ macx: {
 # Default rules for deployment.
 include(deployment.pri)
 
-target.path = /usr/bin
+PREFIX = /usr
 
-desktop.path = /usr/share/applications
-desktop.files = misc/$${TARGET}.desktop
+target.path = $$PREFIX/bin
 
-icon.path = /usr/share/pixmaps
-icon.files = icons/$${TARGET}.png
+desktop.path = $$PREFIX/share/applications
+desktop.files = $$PWD/misc/$${TARGET}.desktop
+
+icon.path = $$PREFIX/share/pixmaps
+icon.files = $$PWD/icons/$${TARGET}.png
 
 INSTALLS += target desktop icon
